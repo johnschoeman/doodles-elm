@@ -27,8 +27,18 @@ type alias Model =
     { viewport : Maybe Viewport
     , colNumber : Int
     , baseColor : DotColor
+    , origin : Coordinate
     }
 
+type alias Coordinate = (Row, Col)
+
+type alias Row = Int
+
+type alias Col = Int
+
+showCoordinate : Coordinate -> String
+showCoordinate coordinate =
+  "(" ++ (String.fromInt <| Tuple.first coordinate) ++ "," ++ (String.fromInt <| Tuple.second coordinate) ++ ")"
 
 type PrimaryColor
     = Red
@@ -57,7 +67,7 @@ type Msg
     = GotViewport Viewport
     | IncrementColNumber
     | DecrementColNumber
-    | ClickDot DotColor
+    | ClickDot DotColor Coordinate
     | RandomizeColor Int
     | GetRandomColor
 
@@ -66,7 +76,8 @@ init : () -> ( Model, Cmd Msg )
 init flags =
     ( { viewport = Nothing
       , colNumber = 6
-      , baseColor = { red = 12, green = 12, blue = 12 }
+      , baseColor = { red = 12, green = 12, blue = 12}
+      , origin = (7, 3)
       }
     , Task.perform GotViewport getViewport
     )
@@ -92,15 +103,16 @@ view model =
                     , button [ class buttonStyle, onClick GetRandomColor ] [ text "R" ]
                     ]
                 , div [] [ text <| showDotColor model.baseColor ]
-                , art viewport model.colNumber model.baseColor
+                , div [] [ text <| showCoordinate model.origin]
+                , art viewport model.colNumber model.baseColor model.origin
                 ]
 
         Nothing ->
             div [] [ text "loading..." ]
 
 
-art : Viewport -> Int -> DotColor -> Html Msg
-art viewport colNumber baseColor =
+art : Viewport -> Int -> DotColor -> Coordinate -> Html Msg
+art viewport colNumber baseColor origin =
     let
         { width, height } =
             viewport.viewport
@@ -111,35 +123,51 @@ art viewport colNumber baseColor =
         w =
             ceiling <| (m + 100) / toFloat (colNumber * 2)
     in
-    div [ class "grid my-vmin m-auto border-2" ] (listOfDots baseColor w colNumber)
+    div [ class "grid dot-box m-auto border-2" ] (listOfDots baseColor w colNumber origin)
 
 
-listOfDots : DotColor -> Int -> Int -> List (Html Msg)
-listOfDots baseColor w count =
+listOfDots : DotColor -> Int -> Int -> Coordinate -> List (Html Msg)
+listOfDots baseColor w count origin =
     let
         baseMatrix =
             List.repeat count (List.repeat count 0)
     in
-    List.indexedMap (\rowIdx row -> rowToDots baseColor w rowIdx row) baseMatrix
+    List.indexedMap (\rowIdx row -> rowToDots baseColor w rowIdx row origin) baseMatrix
 
 
-rowToDots : DotColor -> Int -> Int -> List a -> Html Msg
-rowToDots baseColor w rowIdx row =
+rowToDots : DotColor -> Int -> Int -> List a -> Coordinate -> Html Msg
+rowToDots baseColor w rowIdx row origin =
     div [ class "flex flex-row" ]
-        (List.indexedMap (\colIdx _ -> dot baseColor w rowIdx colIdx) row)
+        (List.indexedMap (\colIdx _ -> dot baseColor w rowIdx colIdx origin) row)
 
 
-dot : DotColor -> Int -> Int -> Int -> Html Msg
-dot { red, green, blue } w rowIdx colIdx =
+getRed : Int -> Float
+getRed dist =
+  255 * (sin (0.1 * (toFloat dist)))
+
+getGreen : Int -> Float
+getGreen dist =
+  255 * (sin (0.2 * (toFloat dist)))
+
+getBlue : Int -> Float
+getBlue dist =
+  255 * (sin (0.3 * (toFloat dist)))
+
+
+dot : DotColor -> Int -> Int -> Int -> Coordinate -> Html Msg
+dot { red, green, blue } w rowIdx colIdx origin =
     let
+        distanceToRow = rowIdx - (Tuple.first origin)
+        distanceToCol = colIdx - (Tuple.second origin)
+
         nextRed =
-            toFloat (modBy 255 (red * colIdx))
+           getRed distanceToRow
 
         nextGreen =
-            toFloat (modBy 255 (green * (rowIdx + colIdx)))
+            getGreen distanceToRow
 
         nextBlue =
-            toFloat (modBy 255 (blue * rowIdx))
+            getBlue distanceToRow
 
         dotColor =
             DotColor red green blue
@@ -155,7 +183,7 @@ dot { red, green, blue } w rowIdx colIdx =
             String.fromInt (w // 2)
     in
     div [ class "w-full h-full flex justify-center items-center" ]
-        [ svg [ Svg.Events.onClick <| ClickDot dotColor, width wString, height wString, viewBox ("0 0 " ++ wString ++ " " ++ wString) ]
+        [ svg [ Svg.Events.onClick <| ClickDot dotColor (rowIdx, colIdx), width wString, height wString, viewBox ("0 0 " ++ wString ++ " " ++ wString) ]
             [ circle
                 [ cx rString
                 , cy rString
@@ -201,12 +229,12 @@ update msg model =
         DecrementColNumber ->
             ( { model | colNumber = model.colNumber - 1 }, Cmd.none )
 
-        ClickDot oldColor ->
+        ClickDot oldColor origin ->
             let
                 nextColor =
                     getNextColor oldColor
             in
-            ( { model | baseColor = nextColor }, Cmd.none )
+            ( { model | baseColor = nextColor, origin = origin }, Cmd.none )
 
         RandomizeColor color ->
             let
@@ -217,6 +245,7 @@ update msg model =
 
         GetRandomColor ->
             ( model, generateBaseColor )
+        
 
 
 getNextColor : DotColor -> DotColor
