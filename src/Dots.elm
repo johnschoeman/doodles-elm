@@ -203,26 +203,6 @@ dot { red, green, blue } w rowIdx colIdx origin =
         ]
 
 
-square : Html msg
-square =
-    svg
-        [ width "400"
-        , height "400"
-        , viewBox "0 0 400 400"
-        ]
-        [ rect
-            [ x "10"
-            , y "10"
-            , fill "blue"
-            , width "100"
-            , height "100"
-            , rx "2"
-            , ry "2"
-            ]
-            []
-        ]
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of

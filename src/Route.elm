@@ -15,6 +15,7 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 type Route
     = Home
     | Dots
+    | Squares
 
 
 parser : Parser (Route -> a) a
@@ -22,6 +23,7 @@ parser =
     oneOf
         [ Parser.map Home Parser.top
         , Parser.map Dots (s "doodles" </> s "dots")
+        , Parser.map Squares (s "doodles" </> s "squares")
         ]
 
 
@@ -51,5 +53,8 @@ routeToString page =
 
                 Dots ->
                     [ "doodles", "dots" ]
+
+                Squares ->
+                    [ "doodles", "squares" ]
     in
     "#/" ++ String.join "/" pieces

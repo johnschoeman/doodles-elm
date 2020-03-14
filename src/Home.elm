@@ -1,6 +1,7 @@
 module Home exposing (Model, Msg, init, subscriptions, update, view)
 
 import Html exposing (Html, a, div, text)
+import Html.Attributes exposing (class)
 import Route
 import Session exposing (WithSession)
 
@@ -20,8 +21,9 @@ init session =
 
 view : Model -> Html msg
 view model =
-    div []
+    div [ class "flex flex-col" ]
         [ a [ Route.href Route.Dots ] [ text "Dots" ]
+        , a [ Route.href Route.Squares ] [ text "Squares" ]
         ]
 
 

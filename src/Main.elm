@@ -12,6 +12,7 @@ import Html.Events exposing (onClick)
 import Random
 import Route
 import Session
+import Squares
 import Svg exposing (circle, rect, svg)
 import Svg.Attributes exposing (cx, cy, fill, height, r, rx, ry, viewBox, width, x, y)
 import Svg.Events
@@ -44,6 +45,7 @@ type Model
     | Loading Session.Model
     | Home Home.Model
     | Dots Dots.Model
+    | Squares Squares.Model
 
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -66,6 +68,7 @@ type Msg
     | GotViewport Viewport
     | HandleHomeMsg Home.Msg
     | HandleDotsMsg Dots.Msg
+    | HandleSquaresMsg Squares.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -109,6 +112,15 @@ update msg model =
             , Cmd.map HandleDotsMsg newMsg
             )
 
+        ( HandleSquaresMsg subMsg, Squares model_ ) ->
+            let
+                ( newModel, newMsg ) =
+                    Squares.update subMsg model_
+            in
+            ( Squares newModel
+            , Cmd.map HandleSquaresMsg newMsg
+            )
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
@@ -131,6 +143,10 @@ changeRouteTo maybeRoute model =
             Dots.init session
                 |> updateWith Dots HandleDotsMsg
 
+        Just Route.Squares ->
+            Squares.init session
+                |> updateWith Squares HandleSquaresMsg
+
 
 toSession : Model -> Session.Model
 toSession model =
@@ -145,6 +161,9 @@ toSession model =
             session
 
         Dots { session } ->
+            session
+
+        Squares { session } ->
             session
 
 
@@ -187,11 +206,14 @@ view model =
 pageContent : Model -> Html Msg
 pageContent model =
     case model of
-        Home homeModel ->
-            Html.map HandleHomeMsg <| Home.view homeModel
+        Home m ->
+            Html.map HandleHomeMsg <| Home.view m
 
-        Dots dotsModel ->
-            Html.map HandleDotsMsg <| Dots.view dotsModel
+        Dots m ->
+            Html.map HandleDotsMsg <| Dots.view m
+
+        Squares m ->
+            Html.map HandleSquaresMsg <| Squares.view m
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]
