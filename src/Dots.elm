@@ -19,6 +19,7 @@ type alias Model =
         { viewport : Maybe Viewport
         , colNumber : Int
         , baseColor : DotColor
+        , dotFunc : DotFunc
         , origin : Coordinate
         }
 
@@ -63,12 +64,20 @@ showDotColor { red, green, blue } =
         ++ String.fromInt blue
 
 
+type alias DotFunc =
+    { redFunc : ColorFunc
+    , greenFunc : ColorFunc
+    , blueFunc : ColorFunc
+    }
+
+
 type Msg
     = GotViewport Viewport
     | IncrementColNumber
     | DecrementColNumber
     | ClickDot DotColor Coordinate
     | RandomizeColor Int
+    | RandomizeDotFunc DotFunc
     | GetRandomColor
 
 
@@ -76,8 +85,9 @@ init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
-      , colNumber = 6
+      , colNumber = 50
       , baseColor = { red = 12, green = 12, blue = 12 }
+      , dotFunc = { redFunc = ModColor, greenFunc = ModColor, blueFunc = ModColor }
       , origin = ( 7, 3 )
       }
     , Task.perform GotViewport getViewport
@@ -87,6 +97,24 @@ init session =
 generateBaseColor : Cmd Msg
 generateBaseColor =
     Random.generate RandomizeColor <| Random.int 1 12
+
+
+generateDotColor : Cmd Msg
+generateDotColor =
+    Random.generate RandomizeDotFunc dotFuncGenerator
+
+
+dotFuncGenerator : Random.Generator DotFunc
+dotFuncGenerator =
+    Random.map3 DotFunc
+        colorFuncGenerator
+        colorFuncGenerator
+        colorFuncGenerator
+
+
+colorFuncGenerator : Random.Generator ColorFunc
+colorFuncGenerator =
+    Random.uniform SinColor [ ModColor ]
 
 
 view : Model -> Html Msg
@@ -105,15 +133,15 @@ view model =
                     ]
                 , div [] [ text <| showDotColor model.baseColor ]
                 , div [] [ text <| showCoordinate model.origin ]
-                , art viewport model.colNumber model.baseColor model.origin
+                , art viewport model
                 ]
 
         Nothing ->
             div [] [ text "loading..." ]
 
 
-art : Viewport -> Int -> DotColor -> Coordinate -> Html Msg
-art viewport colNumber baseColor origin =
+art : Viewport -> Model -> Html Msg
+art viewport { colNumber, baseColor, origin, dotFunc } =
     let
         { width, height } =
             viewport.viewport
@@ -124,41 +152,75 @@ art viewport colNumber baseColor origin =
         w =
             ceiling <| (m + 100) / toFloat (colNumber * 2)
     in
-    div [ class "grid dot-box m-auto border-2" ] (listOfDots baseColor w colNumber origin)
+    div [ class "grid dot-box m-auto border-2" ] (listOfDots baseColor dotFunc w colNumber origin)
 
 
-listOfDots : DotColor -> Int -> Int -> Coordinate -> List (Html Msg)
-listOfDots baseColor w count origin =
+listOfDots : DotColor -> DotFunc -> Int -> Int -> Coordinate -> List (Html Msg)
+listOfDots baseColor dotFunc w count origin =
     let
         baseMatrix =
             List.repeat count (List.repeat count 0)
     in
-    List.indexedMap (\rowIdx row -> rowToDots baseColor w rowIdx row origin) baseMatrix
+    List.indexedMap (\rowIdx row -> rowToDots baseColor dotFunc w rowIdx row origin) baseMatrix
 
 
-rowToDots : DotColor -> Int -> Int -> List a -> Coordinate -> Html Msg
-rowToDots baseColor w rowIdx row origin =
+rowToDots : DotColor -> DotFunc -> Int -> Int -> List a -> Coordinate -> Html Msg
+rowToDots baseColor dotFunc w rowIdx row origin =
     div [ class "flex flex-row" ]
-        (List.indexedMap (\colIdx _ -> dot baseColor w rowIdx colIdx origin) row)
+        (List.indexedMap (\colIdx _ -> dot baseColor dotFunc w rowIdx colIdx origin) row)
 
 
-getRed : Int -> Float
-getRed dist =
-    255 * sin (0.1 * toFloat dist)
+
+---- Color Functions ---
 
 
-getGreen : Int -> Float
-getGreen dist =
-    255 * sin (0.2 * toFloat dist)
+sinColor : Int -> Float
+sinColor dist =
+    255 * sin (0.5 * toFloat dist)
 
 
-getBlue : Int -> Float
-getBlue dist =
-    255 * sin (0.3 * toFloat dist)
+modColor : Int -> Float
+modColor dist =
+    modBy 255 (dist * 20) |> toFloat
 
 
-dot : DotColor -> Int -> Int -> Int -> Coordinate -> Html Msg
-dot { red, green, blue } w rowIdx colIdx origin =
+getRed : ColorFunc -> Int -> Float
+getRed colorFunc dist =
+    showModColor colorFunc dist
+
+
+getGreen : ColorFunc -> Int -> Float
+getGreen colorFunc dist =
+    showModColor colorFunc dist
+
+
+getBlue : ColorFunc -> Int -> Float
+getBlue colorFunc dist =
+    showModColor colorFunc dist
+
+
+showModColor : ColorFunc -> (Int -> Float)
+showModColor func =
+    case func of
+        ModColor ->
+            modColor
+
+        SinColor ->
+            sinColor
+
+
+type ColorFunc
+    = ModColor
+    | SinColor
+
+
+radialDist : Int -> Int -> Int
+radialDist row col =
+    ceiling <| sqrt (toFloat (row * row) + toFloat (col * col))
+
+
+dot : DotColor -> DotFunc -> Int -> Int -> Int -> Coordinate -> Html Msg
+dot { red, green, blue } { redFunc, greenFunc, blueFunc } w rowIdx colIdx origin =
     let
         distanceToRow =
             rowIdx - Tuple.first origin
@@ -166,14 +228,23 @@ dot { red, green, blue } w rowIdx colIdx origin =
         distanceToCol =
             colIdx - Tuple.second origin
 
+        radDist =
+            radialDist distanceToCol distanceToRow
+
+        addDist =
+            distanceToCol + distanceToRow
+
+        multDist =
+            distanceToCol * distanceToRow
+
         nextRed =
-            getRed distanceToRow
+            getRed redFunc radDist
 
         nextGreen =
-            getGreen distanceToRow
+            getGreen greenFunc addDist
 
         nextBlue =
-            getBlue distanceToRow
+            getBlue blueFunc multDist
 
         dotColor =
             DotColor red green blue
@@ -229,8 +300,11 @@ update msg model =
             in
             ( { model | baseColor = nextColor }, Cmd.none )
 
+        RandomizeDotFunc df ->
+            ( { model | dotFunc = df }, Cmd.none )
+
         GetRandomColor ->
-            ( model, generateBaseColor )
+            ( model, Cmd.batch [ generateBaseColor, generateDotColor ] )
 
 
 getNextColor : DotColor -> DotColor
@@ -251,15 +325,15 @@ getNextColor color =
     in
     case maxColor of
         Red ->
-            { color | red = modColor <| color.red + 10, green = modColor <| color.green - 1, blue = modColor <| color.blue - 1 }
+            { color | red = modBaseColor <| color.red + 10, green = modBaseColor <| color.green - 1, blue = modBaseColor <| color.blue - 1 }
 
         Green ->
-            { color | red = modColor <| color.red - 1, green = modColor <| color.green + 10, blue = modColor <| color.blue - 1 }
+            { color | red = modBaseColor <| color.red - 1, green = modBaseColor <| color.green + 10, blue = modBaseColor <| color.blue - 1 }
 
         Blue ->
-            { color | red = modColor <| color.red - 1, green = modColor <| color.green - 1, blue = modColor <| color.blue + 10 }
+            { color | red = modBaseColor <| color.red - 1, green = modBaseColor <| color.green - 1, blue = modBaseColor <| color.blue + 10 }
 
 
-modColor : Int -> Int
-modColor c =
+modBaseColor : Int -> Int
+modBaseColor c =
     modBy 12 c
