@@ -11,7 +11,9 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-css": "npx tailwindcss build src/main.css -o src/output.css"
+    "build-css": "npx tailwindcss build src/main.css -o src/output.css",
+    "build": "elm-format --validate src/ && yarn build-css && elm-app build",
+    "start": "elm-app start"
   },
   "repository": {
     "type": "git",
