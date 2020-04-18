@@ -311,13 +311,13 @@ getNextColor : DotColor -> DotColor
 getNextColor color =
     let
         maxColor =
-            if Debug.log "red" color.red > color.green && color.green > color.blue then
+            if color.red > color.green && color.green > color.blue then
                 Red
 
-            else if Debug.log "green" color.green > color.red && color.red > color.blue then
+            else if color.green > color.red && color.red > color.blue then
                 Green
 
-            else if Debug.log "blue" color.blue > color.red && color.red > color.green then
+            else if color.blue > color.red && color.red > color.green then
                 Blue
 
             else
