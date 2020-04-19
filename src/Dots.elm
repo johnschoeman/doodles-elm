@@ -5,6 +5,7 @@ import Color
 import Html exposing (Html, button, div, option, p, select, text)
 import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onClick, onInput)
+import InputHelpers exposing (squareButton)
 import Random
 import Session exposing (WithSession)
 import Svg exposing (circle, svg)
@@ -265,13 +266,13 @@ distFuncFromString str =
         "Taxi" ->
             Taxi
 
-        "Mult" ->
+        "Multiply" ->
             Mult
 
-        "ColOnly" ->
+        "Col Only" ->
             ColOnly
 
-        "RowOnly" ->
+        "Row Only" ->
             RowOnly
 
         _ ->
@@ -473,10 +474,8 @@ view model =
     case model.viewport of
         Just viewport ->
             div [ class "p-32" ]
-                [ div []
-                    [ button [ class buttonStyle, onClick IncrementColNumber ] [ text "+" ]
-                    , button [ class buttonStyle, onClick DecrementColNumber ] [ text "-" ]
-                    , button [ class buttonStyle, onClick GetRandomColor ] [ text "R" ]
+                [ div [ class "flex flex-row w-full justify-between" ]
+                    [ dotButtons
                     , rgbColorFunctionSelector model.rgbFunc
                     , rgbDistFunctionSelector model.rgbDist
                     ]
@@ -489,9 +488,18 @@ view model =
             div [] [ text "loading..." ]
 
 
+dotButtons : Html Msg
+dotButtons =
+    div [ class "flex flex-row w-full" ]
+        [ squareButton IncrementColNumber "+"
+        , squareButton DecrementColNumber "-"
+        , squareButton GetRandomColor "?"
+        ]
+
+
 rgbColorFunctionSelector : RGBFunc -> Html Msg
 rgbColorFunctionSelector rgbFunc =
-    div []
+    div [ class "flex flex-row w-full" ]
         [ colorFunctionSelector rgbFunc.redFunc SetRedColorFunction
         , colorFunctionSelector rgbFunc.greenFunc SetGreenColorFunction
         , colorFunctionSelector rgbFunc.blueFunc SetBlueColorFunction
@@ -500,16 +508,19 @@ rgbColorFunctionSelector rgbFunc =
 
 colorFunctionSelector : ColorFunc -> (String -> Msg) -> Html Msg
 colorFunctionSelector currentColorFunc toMsg =
-    div []
-        [ select [ onInput toMsg ]
-            [ functionSelectOption showColorFunc ModColor currentColorFunc
-            , functionSelectOption showColorFunc SinColor currentColorFunc
-            , functionSelectOption showColorFunc CosColor currentColorFunc
-            , functionSelectOption showColorFunc TanColor currentColorFunc
-            , functionSelectOption showColorFunc ClampColor currentColorFunc
-            , functionSelectOption showColorFunc SawColor currentColorFunc
-            , functionSelectOption showColorFunc SquareColor currentColorFunc
-            ]
+    let
+        f =
+            showColorFunc
+    in
+    InputHelpers.dropDown toMsg
+        currentColorFunc
+        [ InputHelpers.Option (f ModColor) (f ModColor) ModColor
+        , InputHelpers.Option (f SinColor) (f SinColor) SinColor
+        , InputHelpers.Option (f CosColor) (f CosColor) CosColor
+        , InputHelpers.Option (f TanColor) (f TanColor) TanColor
+        , InputHelpers.Option (f SawColor) (f SawColor) SawColor
+        , InputHelpers.Option (f SquareColor) (f SquareColor) SquareColor
+        , InputHelpers.Option (f ClampColor) (f ClampColor) ClampColor
         ]
 
 
@@ -520,7 +531,7 @@ functionSelectOption toString colorFunc s =
 
 rgbDistFunctionSelector : RGBDist -> Html Msg
 rgbDistFunctionSelector rgbDist =
-    div []
+    div [ class "flex flex-row w-full" ]
         [ distFunctionSelector rgbDist.red SetRedDistFunction
         , distFunctionSelector rgbDist.green SetGreenDistFunction
         , distFunctionSelector rgbDist.blue SetBlueDistFunction
@@ -528,15 +539,18 @@ rgbDistFunctionSelector rgbDist =
 
 
 distFunctionSelector : DistFunc -> (String -> Msg) -> Html Msg
-distFunctionSelector distFunc toMsg =
-    div []
-        [ select [ onInput toMsg ]
-            [ option [ value "Radial", selected (distFunc == Radial) ] [ text "Radial" ]
-            , option [ value "Taxi", selected (distFunc == Taxi) ] [ text "Taxi" ]
-            , option [ value "Mult", selected (distFunc == Mult) ] [ text "Mult" ]
-            , option [ value "RowOnly", selected (distFunc == RowOnly) ] [ text "RowOnly" ]
-            , option [ value "ColOnly", selected (distFunc == ColOnly) ] [ text "ColOnly" ]
-            ]
+distFunctionSelector currentDistFunc toMsg =
+    let
+        f =
+            showDistFunc
+    in
+    InputHelpers.dropDown toMsg
+        currentDistFunc
+        [ InputHelpers.Option (f Radial) (f Radial) Radial
+        , InputHelpers.Option (f Taxi) (f Taxi) Taxi
+        , InputHelpers.Option (f Mult) (f Mult) Mult
+        , InputHelpers.Option (f RowOnly) (f RowOnly) RowOnly
+        , InputHelpers.Option (f ColOnly) (f ColOnly) ColOnly
         ]
 
 

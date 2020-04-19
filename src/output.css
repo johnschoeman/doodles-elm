@@ -13949,7 +13949,6 @@ video {
 .dot-box {
   height: 65vmin;
   width: 65vmin;
-  transform: rotate(45deg);
 }
 
 @media (min-width: 640px) {
