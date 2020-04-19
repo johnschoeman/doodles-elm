@@ -64,6 +64,11 @@ showDotColor { red, green, blue } =
         ++ String.fromInt blue
 
 
+generateBaseColor : Cmd Msg
+generateBaseColor =
+    Random.generate RandomizeColor <| Random.int 1 12
+
+
 type alias RGBFunc =
     { redFunc : ColorFunc
     , greenFunc : ColorFunc
@@ -74,6 +79,72 @@ type alias RGBFunc =
 type ColorFunc
     = ModColor
     | SinColor
+    | CosColor
+    | TanColor
+    | ClampColor
+    | SawColor
+    | SquareColor
+
+
+generateDotColor : Cmd Msg
+generateDotColor =
+    Random.generate RandomizeDotFunc dotFuncGenerator
+
+
+dotFuncGenerator : Random.Generator RGBFunc
+dotFuncGenerator =
+    Random.map3 RGBFunc
+        colorFuncGenerator
+        colorFuncGenerator
+        colorFuncGenerator
+
+
+colorFuncGenerator : Random.Generator ColorFunc
+colorFuncGenerator =
+    Random.uniform SinColor [ ModColor, TanColor, ClampColor, CosColor, SawColor, SquareColor ]
+
+
+getColor : ColorFunc -> Int -> Float
+getColor colorFunc dist =
+    case colorFunc of
+        ModColor ->
+            modBy 255 (dist * 10) |> toFloat
+
+        SinColor ->
+            255 * sin (0.1 * toFloat dist)
+
+        CosColor ->
+            255 * cos (0.1 * toFloat dist)
+
+        TanColor ->
+            255 * tan (0.1 * toFloat dist)
+
+        ClampColor ->
+            255 - (clamp 0 255 (dist * 5) |> toFloat)
+
+        SawColor ->
+            let
+                amplitue =
+                    255
+
+                halfPeriod =
+                    20
+            in
+            (amplitue / halfPeriod) * (halfPeriod - abs (modBy (2 * halfPeriod) dist - halfPeriod) |> toFloat)
+
+        SquareColor ->
+            let
+                amplitude =
+                    255
+
+                halfPeriod =
+                    10
+            in
+            if modBy (2 * halfPeriod) dist < halfPeriod then
+                amplitude
+
+            else
+                0
 
 
 showColorFunc : ColorFunc -> String
@@ -85,15 +156,45 @@ showColorFunc colorFunc =
         SinColor ->
             "Sine Wave"
 
+        CosColor ->
+            "Cosine Wave"
+
+        TanColor ->
+            "Tangent Wave"
+
+        ClampColor ->
+            "Clamp"
+
+        SawColor ->
+            "Saw"
+
+        SquareColor ->
+            "Square"
+
 
 colorFuncFromString : String -> ColorFunc
 colorFuncFromString str =
     case str of
-        "Mod" ->
+        "Modulo" ->
             ModColor
 
-        "Sin" ->
+        "Sine Wave" ->
             SinColor
+
+        "Cosine Wave" ->
+            CosColor
+
+        "Tangent Wave" ->
+            TanColor
+
+        "Clamp" ->
+            ClampColor
+
+        "Saw" ->
+            SawColor
+
+        "Square" ->
+            SquareColor
 
         _ ->
             ModColor
@@ -112,6 +213,24 @@ type DistFunc
     | Mult
     | ColOnly
     | RowOnly
+
+
+generateDotDist : Cmd Msg
+generateDotDist =
+    Random.generate RandomizeDistFunc dotDistGenerator
+
+
+dotDistGenerator : Random.Generator RGBDist
+dotDistGenerator =
+    Random.map3 RGBDist
+        distFuncGenerator
+        distFuncGenerator
+        distFuncGenerator
+
+
+distFuncGenerator : Random.Generator DistFunc
+distFuncGenerator =
+    Random.uniform Radial [ Taxi, Mult, RowOnly, ColOnly ]
 
 
 type alias Dist =
@@ -207,47 +326,6 @@ type Msg
     | SetGreenDistFunction String
     | SetBlueDistFunction String
     | GetRandomColor
-
-
-generateBaseColor : Cmd Msg
-generateBaseColor =
-    Random.generate RandomizeColor <| Random.int 1 12
-
-
-generateDotColor : Cmd Msg
-generateDotColor =
-    Random.generate RandomizeDotFunc dotFuncGenerator
-
-
-dotFuncGenerator : Random.Generator RGBFunc
-dotFuncGenerator =
-    Random.map3 RGBFunc
-        colorFuncGenerator
-        colorFuncGenerator
-        colorFuncGenerator
-
-
-colorFuncGenerator : Random.Generator ColorFunc
-colorFuncGenerator =
-    Random.uniform SinColor [ ModColor ]
-
-
-generateDotDist : Cmd Msg
-generateDotDist =
-    Random.generate RandomizeDistFunc dotDistGenerator
-
-
-dotDistGenerator : Random.Generator RGBDist
-dotDistGenerator =
-    Random.map3 RGBDist
-        distFuncGenerator
-        distFuncGenerator
-        distFuncGenerator
-
-
-distFuncGenerator : Random.Generator DistFunc
-distFuncGenerator =
-    Random.uniform Radial [ Taxi, Mult, RowOnly, ColOnly ]
 
 
 
@@ -414,85 +492,45 @@ view model =
 rgbColorFunctionSelector : RGBFunc -> Html Msg
 rgbColorFunctionSelector rgbFunc =
     div []
-        [ colorRedFunctionSelector rgbFunc.redFunc
-        , colorGreenFunctionSelector rgbFunc.greenFunc
-        , colorBlueFunctionSelector rgbFunc.blueFunc
+        [ colorFunctionSelector rgbFunc.redFunc SetRedColorFunction
+        , colorFunctionSelector rgbFunc.greenFunc SetGreenColorFunction
+        , colorFunctionSelector rgbFunc.blueFunc SetBlueColorFunction
         ]
 
 
-colorRedFunctionSelector : ColorFunc -> Html Msg
-colorRedFunctionSelector colorFunc =
+colorFunctionSelector : ColorFunc -> (String -> Msg) -> Html Msg
+colorFunctionSelector currentColorFunc toMsg =
     div []
-        [ select [ onInput SetRedColorFunction ]
-            [ option [ value "Mod", selected (colorFunc == ModColor) ] [ text "Mod" ]
-            , option [ value "Sin", selected (colorFunc == SinColor) ] [ text "Sin" ]
+        [ select [ onInput toMsg ]
+            [ functionSelectOption showColorFunc ModColor currentColorFunc
+            , functionSelectOption showColorFunc SinColor currentColorFunc
+            , functionSelectOption showColorFunc CosColor currentColorFunc
+            , functionSelectOption showColorFunc TanColor currentColorFunc
+            , functionSelectOption showColorFunc ClampColor currentColorFunc
+            , functionSelectOption showColorFunc SawColor currentColorFunc
+            , functionSelectOption showColorFunc SquareColor currentColorFunc
             ]
         ]
 
 
-colorGreenFunctionSelector : ColorFunc -> Html Msg
-colorGreenFunctionSelector colorFunc =
-    div []
-        [ select [ onInput SetGreenColorFunction ]
-            [ option [ value "Mod", selected (colorFunc == ModColor) ] [ text "Mod" ]
-            , option [ value "Sin", selected (colorFunc == SinColor) ] [ text "Sin" ]
-            ]
-        ]
-
-
-colorBlueFunctionSelector : ColorFunc -> Html Msg
-colorBlueFunctionSelector colorFunc =
-    div []
-        [ select [ onInput SetBlueColorFunction ]
-            [ option [ value "Mod", selected (colorFunc == ModColor) ] [ text "Mod" ]
-            , option [ value "Sin", selected (colorFunc == SinColor) ] [ text "Sin" ]
-            ]
-        ]
-
-
-
--- text <| showColorFunc colorFunc
+functionSelectOption : (ColorFunc -> String) -> ColorFunc -> ColorFunc -> Html Msg
+functionSelectOption toString colorFunc s =
+    option [ value <| toString colorFunc, selected (colorFunc == s) ] [ text <| toString colorFunc ]
 
 
 rgbDistFunctionSelector : RGBDist -> Html Msg
 rgbDistFunctionSelector rgbDist =
     div []
-        [ redDistFunctionSelector rgbDist.red
-        , greenDistFunctionSelector rgbDist.green
-        , blueDistFunctionSelector rgbDist.blue
+        [ distFunctionSelector rgbDist.red SetRedDistFunction
+        , distFunctionSelector rgbDist.green SetGreenDistFunction
+        , distFunctionSelector rgbDist.blue SetBlueDistFunction
         ]
 
 
-redDistFunctionSelector : DistFunc -> Html Msg
-redDistFunctionSelector distFunc =
+distFunctionSelector : DistFunc -> (String -> Msg) -> Html Msg
+distFunctionSelector distFunc toMsg =
     div []
-        [ select [ onInput SetRedDistFunction ]
-            [ option [ value "Radial", selected (distFunc == Radial) ] [ text "Radial" ]
-            , option [ value "Taxi", selected (distFunc == Taxi) ] [ text "Taxi" ]
-            , option [ value "Mult", selected (distFunc == Mult) ] [ text "Mult" ]
-            , option [ value "RowOnly", selected (distFunc == RowOnly) ] [ text "RowOnly" ]
-            , option [ value "ColOnly", selected (distFunc == ColOnly) ] [ text "ColOnly" ]
-            ]
-        ]
-
-
-greenDistFunctionSelector : DistFunc -> Html Msg
-greenDistFunctionSelector distFunc =
-    div []
-        [ select [ onInput SetGreenDistFunction ]
-            [ option [ value "Radial", selected (distFunc == Radial) ] [ text "Radial" ]
-            , option [ value "Taxi", selected (distFunc == Taxi) ] [ text "Taxi" ]
-            , option [ value "Mult", selected (distFunc == Mult) ] [ text "Mult" ]
-            , option [ value "RowOnly", selected (distFunc == RowOnly) ] [ text "RowOnly" ]
-            , option [ value "ColOnly", selected (distFunc == ColOnly) ] [ text "ColOnly" ]
-            ]
-        ]
-
-
-blueDistFunctionSelector : DistFunc -> Html Msg
-blueDistFunctionSelector distFunc =
-    div []
-        [ select [ onInput SetBlueDistFunction ]
+        [ select [ onInput toMsg ]
             [ option [ value "Radial", selected (distFunc == Radial) ] [ text "Radial" ]
             , option [ value "Taxi", selected (distFunc == Taxi) ] [ text "Taxi" ]
             , option [ value "Mult", selected (distFunc == Mult) ] [ text "Mult" ]
@@ -534,45 +572,6 @@ rowToDots baseColor rgbFunc rgbDist w rowIdx row origin =
         (List.indexedMap (\colIdx _ -> dot baseColor rgbFunc rgbDist w rowIdx colIdx origin) row)
 
 
-
----- Color Functions ---
-
-
-sinColor : Int -> Float
-sinColor dist =
-    255 * sin (0.5 * toFloat dist)
-
-
-modColor : Int -> Float
-modColor dist =
-    modBy 255 (dist * 20) |> toFloat
-
-
-getRed : ColorFunc -> Int -> Float
-getRed colorFunc dist =
-    showModColor colorFunc dist
-
-
-getGreen : ColorFunc -> Int -> Float
-getGreen colorFunc dist =
-    showModColor colorFunc dist
-
-
-getBlue : ColorFunc -> Int -> Float
-getBlue colorFunc dist =
-    showModColor colorFunc dist
-
-
-showModColor : ColorFunc -> (Int -> Float)
-showModColor func =
-    case func of
-        ModColor ->
-            modColor
-
-        SinColor ->
-            sinColor
-
-
 dot : DotColor -> RGBFunc -> RGBDist -> Int -> Int -> Int -> Coordinate -> Html Msg
 dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist w rowIdx colIdx origin =
     let
@@ -592,13 +591,13 @@ dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist w rowIdx colId
             getDist rgbDist.blue distanceToRow distanceToCol
 
         nextRed =
-            getRed redFunc redDist
+            getColor redFunc redDist
 
         nextGreen =
-            getGreen greenFunc greenDist
+            getColor greenFunc greenDist
 
         nextBlue =
-            getBlue blueFunc blueDist
+            getColor blueFunc blueDist
 
         dotColor =
             DotColor red green blue
