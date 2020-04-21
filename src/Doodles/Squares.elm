@@ -1,10 +1,10 @@
-module Squares exposing (Model, Msg, init, update, view)
+module Doodles.Squares exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
-import Html exposing (Html, div, text)
+import Html exposing (Html, div)
 import Session exposing (WithSession)
 import Svg exposing (rect, svg)
-import Svg.Attributes exposing (cx, cy, fill, height, r, rx, ry, viewBox, width, x, y)
+import Svg.Attributes exposing (fill, height, rx, ry, viewBox, width, x, y)
 import Task
 
 

@@ -1,4 +1,4 @@
-module Dots exposing (Model, Msg, init, update, view)
+module Doodles.Dots exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import Color

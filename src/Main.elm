@@ -1,22 +1,14 @@
 module Main exposing (..)
 
 import Browser
-import Browser.Dom exposing (Viewport, getViewport)
+import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
-import Color
-import Dots
+import Doodles.Dots as Dots
+import Doodles.Squares as Squares
 import Home
-import Html exposing (Html, a, button, div, footer, h1, h2, p, text, ul)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
-import Random
+import Html exposing (Html, a, div, footer, h1, h2, text)
 import Route
 import Session
-import Squares
-import Svg exposing (circle, rect, svg)
-import Svg.Attributes exposing (cx, cy, fill, height, r, rx, ry, viewBox, width, x, y)
-import Svg.Events
-import Task
 import Url
 
 
