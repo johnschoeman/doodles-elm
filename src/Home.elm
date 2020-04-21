@@ -24,6 +24,7 @@ view model =
     div [ class "flex flex-col" ]
         [ a [ Route.href Route.Dots ] [ text "Dots" ]
         , a [ Route.href Route.Squares ] [ text "Squares" ]
+        , a [ Route.href Route.Recaman ] [ text "Recaman" ]
         ]
 
 

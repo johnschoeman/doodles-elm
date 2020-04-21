@@ -16,6 +16,7 @@ type Route
     = Home
     | Dots
     | Squares
+    | Recaman
 
 
 parser : Parser (Route -> a) a
@@ -24,6 +25,7 @@ parser =
         [ Parser.map Home Parser.top
         , Parser.map Dots (s "doodles" </> s "dots")
         , Parser.map Squares (s "doodles" </> s "squares")
+        , Parser.map Recaman (s "doodles" </> s "recaman")
         ]
 
 
@@ -56,5 +58,8 @@ routeToString page =
 
                 Squares ->
                     [ "doodles", "squares" ]
+
+                Recaman ->
+                    [ "doodles", "recaman" ]
     in
     "#/" ++ String.join "/" pieces

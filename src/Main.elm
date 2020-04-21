@@ -3,8 +3,9 @@ module Main exposing (..)
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
-import Doodles.Dots as Dots
-import Doodles.Squares as Squares
+import Doodle.Dots as Dots
+import Doodle.Recaman as Recaman
+import Doodle.Squares as Squares
 import Home
 import Html exposing (Html, a, div, footer, h1, h2, text)
 import Route
@@ -38,6 +39,7 @@ type Model
     | Home Home.Model
     | Dots Dots.Model
     | Squares Squares.Model
+    | Recaman Recaman.Model
 
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -61,6 +63,7 @@ type Msg
     | HandleHomeMsg Home.Msg
     | HandleDotsMsg Dots.Msg
     | HandleSquaresMsg Squares.Msg
+    | HandleRecamanMsg Recaman.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -113,6 +116,15 @@ update msg model =
             , Cmd.map HandleSquaresMsg newMsg
             )
 
+        ( HandleRecamanMsg subMsg, Recaman model_ ) ->
+            let
+                ( newModel, newMsg ) =
+                    Recaman.update subMsg model_
+            in
+            ( Recaman newModel
+            , Cmd.map HandleRecamanMsg newMsg
+            )
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
@@ -139,6 +151,10 @@ changeRouteTo maybeRoute model =
             Squares.init session
                 |> updateWith Squares HandleSquaresMsg
 
+        Just Route.Recaman ->
+            Recaman.init session
+                |> updateWith Recaman HandleRecamanMsg
+
 
 toSession : Model -> Session.Model
 toSession model =
@@ -156,6 +172,9 @@ toSession model =
             session
 
         Squares { session } ->
+            session
+
+        Recaman { session } ->
             session
 
 
@@ -206,6 +225,9 @@ pageContent model =
 
         Squares m ->
             Html.map HandleSquaresMsg <| Squares.view m
+
+        Recaman m ->
+            Html.map HandleRecamanMsg <| Recaman.view m
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]

@@ -1,4 +1,4 @@
-module Doodles.Squares exposing (Model, Msg, init, update, view)
+module Doodle.Squares exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import Html exposing (Html, div)
