@@ -12,7 +12,8 @@
             "elm/random": "1.0.0",
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
-            "tesk9/palette": "2.0.0"
+            "tesk9/palette": "2.0.0",
+            "the-sett/lazy-list": "1.1.1"
         },
         "indirect": {
             "elm/json": "1.1.2",
