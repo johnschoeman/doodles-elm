@@ -8,8 +8,8 @@ import Html.Events exposing (onClick, onInput)
 import InputHelpers exposing (squareButton)
 import Random
 import Session exposing (WithSession)
-import Svg exposing (circle, svg)
-import Svg.Attributes exposing (cx, cy, fill, height, r, rx, ry, viewBox, width, x, y)
+import Svg exposing (rect, svg)
+import Svg.Attributes exposing (fill, height, rx, ry, viewBox, width, x, y)
 import Svg.Events
 import Task
 
@@ -622,19 +622,15 @@ dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist w rowIdx colId
 
         wString =
             String.fromInt w
-
-        rString =
-            String.fromInt (w // 2)
     in
     div [ class "w-full h-full flex justify-center items-center" ]
         [ svg [ Svg.Events.onClick <| ClickDot dotColor ( rowIdx, colIdx ), width wString, height wString, viewBox ("0 0 " ++ wString ++ " " ++ wString) ]
-            [ circle
-                [ cx rString
-                , cy rString
+            [ rect
+                [ x "0"
+                , y "0"
                 , fill fillColor
-                , r rString
-                , width <| String.fromInt w
-                , height <| String.fromInt w
+                , width wString
+                , height wString
                 ]
                 []
             ]
