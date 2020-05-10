@@ -2,13 +2,14 @@ module Doodle.Recaman exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import Html exposing (Html, div, input, text)
-import Html.Attributes as Attr exposing (class, style, type_)
+import Html.Attributes as Attr exposing (class, style, type_, value)
 import Html.Events exposing (onInput)
+import InputHelpers
 import Seq exposing (Seq)
 import Session exposing (WithSession)
 import Set exposing (Set)
 import Svg exposing (path, svg)
-import Svg.Attributes exposing (cx, cy, d, fill, stroke, strokeWidth, viewBox)
+import Svg.Attributes exposing (d, fill, stroke, strokeWidth, viewBox)
 import Task
 
 
@@ -18,11 +19,118 @@ type alias Model =
         , scale : Scale
         , count : Int
         , root : Int
+        , sweepPattern : SweepPattern
         }
 
 
-type alias Recaman =
-    List Int
+type SweepPattern
+    = A
+    | B
+    | C
+    | D
+    | E
+    | F
+    | G
+    | H
+
+
+showPattern : SweepPattern -> String
+showPattern pattern =
+    case pattern of
+        A ->
+            "Butts"
+
+        B ->
+            "Waves"
+
+        C ->
+            "Pure"
+
+        D ->
+            "UnderParallels"
+
+        E ->
+            "InvertedButts"
+
+        F ->
+            "OverParallels"
+
+        G ->
+            "Tails"
+
+        H ->
+            "OverWaves"
+
+
+patternFromString : String -> SweepPattern
+patternFromString pattern =
+    case pattern of
+        "Butts" ->
+            A
+
+        "Waves" ->
+            B
+
+        "Pure" ->
+            C
+
+        "UnderParallels" ->
+            D
+
+        "InvertedButts" ->
+            E
+
+        "OverParallels" ->
+            F
+
+        "Tails" ->
+            G
+
+        "OverWaves" ->
+            H
+
+        _ ->
+            A
+
+
+type alias IncDec =
+    Bool
+
+
+type alias OddIndex =
+    Bool
+
+
+type alias OnDirectionChange =
+    Bool
+
+
+toFoo : SweepPattern -> ( IncDec, OddIndex, OnDirectionChange )
+toFoo sweep =
+    case sweep of
+        A ->
+            ( True, True, True )
+
+        B ->
+            ( True, False, True )
+
+        C ->
+            ( False, True, True )
+
+        D ->
+            ( False, False, True )
+
+        E ->
+            ( True, True, False )
+
+        F ->
+            ( True, False, False )
+
+        G ->
+            ( False, True, False )
+
+        H ->
+            ( False, False, False )
 
 
 type alias Scale =
@@ -33,9 +141,10 @@ init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
-      , scale = 10
-      , count = 100
-      , root = 1
+      , scale = 2
+      , count = 400
+      , root = 17
+      , sweepPattern = G
       }
     , Task.perform GotViewport getViewport
     )
@@ -43,7 +152,6 @@ init session =
 
 sequenceToPairs : List Int -> List ( Int, Int )
 sequenceToPairs seq =
-    -- [1, 2, 3, 4] -> [(1, 2), (2, 3), (3, 4)]
     let
         h =
             List.head seq
@@ -80,10 +188,6 @@ generateRecaman n root count =
     Seq.toList nTerms
 
 
-
--- [ 1, 2, 4 ]
-
-
 recamanSeq : Int -> Int -> Int -> Set Int -> Seq Int -> Seq Int
 recamanSeq count n lastTerm visited soFar =
     let
@@ -118,32 +222,12 @@ recamanSeq count n lastTerm visited soFar =
         Seq.reverse soFar
 
 
-
--- Seq.cons plusTerm Seq.numbers
---   @JSExport
---   def generateRecaman(n: Int, root: Int, count: Int) = {
---     val list = recaman(n, root, Set()).take(count).toList
---     list.asJson.noSpaces
---   }
---
---   @JSExport
---   def recaman(n: Int, lastTerm: Int, visited: Set[Int]): Stream[Int] = {
---     val minusTerm: Int = lastTerm - n
---     if (minusTerm >= 0 && !visited.contains(minusTerm)) {
---       minusTerm #:: recaman(n + 1, minusTerm, visited.+(minusTerm))
---     } else {
---       val plusTerm: Int = lastTerm + n
---       plusTerm #:: recaman(n + 1, plusTerm, visited + plusTerm)
---     }
---   }
--- }
-
-
 type Msg
     = GotViewport Viewport
     | UpdateCount Int
     | UpdateRoot Int
     | UpdateScale Int
+    | UpdateSweepPattern String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -160,6 +244,9 @@ update msg model =
 
         UpdateScale scale ->
             ( { model | scale = scale }, Cmd.none )
+
+        UpdateSweepPattern pattern ->
+            ( { model | sweepPattern = patternFromString pattern }, Cmd.none )
 
 
 
@@ -185,12 +272,16 @@ artInputs model =
         [ style "display" "flex"
         , style "flex-direction" "column"
         , style "justify-content" "space-around"
-        , style "height" "80px"
-        , style "width" "200px"
+        , style "height" "140px"
+        , style "width" "400px"
+        , style "border" "1px solid gray"
+        , style "padding" "16px"
+        , style "position" "fixed"
         ]
         [ slider 0 1000 model.count UpdateCount
-        , slider 0 111 model.count UpdateRoot
-        , slider 1 17 model.count UpdateScale
+        , slider 0 111 model.root UpdateRoot
+        , slider 1 17 model.scale UpdateScale
+        , drawSettingDropdown model.sweepPattern UpdateSweepPattern
         ]
 
 
@@ -209,17 +300,37 @@ slider minValue maxValue n toMsg =
         [ type_ "range"
         , Attr.min <| String.fromInt minValue
         , Attr.max <| String.fromInt maxValue
+        , value <| String.fromInt n
         , onInput f
         ]
         []
 
 
+drawSettingDropdown : SweepPattern -> (String -> Msg) -> Html Msg
+drawSettingDropdown currentPattern toMsg =
+    InputHelpers.dropDown toMsg
+        currentPattern
+        [ InputHelpers.Option (showPattern A) (showPattern A) A
+        , InputHelpers.Option (showPattern B) (showPattern B) B
+        , InputHelpers.Option (showPattern C) (showPattern C) C
+        , InputHelpers.Option (showPattern D) (showPattern D) D
+        , InputHelpers.Option (showPattern E) (showPattern E) E
+        , InputHelpers.Option (showPattern F) (showPattern F) F
+        , InputHelpers.Option (showPattern G) (showPattern G) G
+        , InputHelpers.Option (showPattern H) (showPattern H) H
+        ]
+
+
 art : Viewport -> Model -> Html msg
-art viewport { count, root, scale } =
+art viewport { sweepPattern, count, root, scale } =
     let
         recaman =
             generateRecaman 0 root count
 
+        -- [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+        -- [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ]
+        -- [ 0, 10, 9, 8, 11, 12, 13, 4, 3, 2, 1, 0 ]
+        -- [1, 2, 3, 4]
         { width, height } =
             viewport.viewport
 
@@ -241,18 +352,18 @@ art viewport { count, root, scale } =
     div [ class "border bg-gray-100" ]
         [ svg [ viewBox <| String.join " " [ "0 0", mString, mString ] ]
             [ path
-                [ d <| makeSvgPath startY pairsWithScale
+                [ d <| makeSvgPath sweepPattern startY pairsWithScale
                 , stroke "black"
-                , strokeWidth "1"
-                , fill "white"
+                , strokeWidth "2"
+                , fill "pink"
                 ]
                 []
             ]
         ]
 
 
-makeSvgPath : Int -> List ( Int, Int ) -> String
-makeSvgPath startY pairs =
+makeSvgPath : SweepPattern -> Int -> List ( Int, Int ) -> String
+makeSvgPath sweepPattern startY pairs =
     let
         maybeFirstPoint =
             List.head pairs
@@ -261,7 +372,7 @@ makeSvgPath startY pairs =
         Just ( startX, _ ) ->
             pathDrawing
                 (startPoint startX startY
-                    :: makeHalfCirlces startY pairs
+                    :: makeHalfCirlces sweepPattern startY pairs
                 )
 
         Nothing ->
@@ -283,13 +394,32 @@ applyScale scale seq =
     List.map (\t -> Tuple.mapBoth (\x -> x * scale) (\x -> x * scale) t) seq
 
 
-makeHalfCirlces : Int -> List ( Int, Int ) -> List String
-makeHalfCirlces y points =
-    List.indexedMap (\idx ( l, r ) -> halfCircle y l r (sweepDirection l r idx)) points
+makeHalfCirlces : SweepPattern -> Int -> List ( Int, Int ) -> List String
+makeHalfCirlces sweepPattern y points =
+    List.indexedMap (\idx ( l, r ) -> buildCircle sweepPattern y l r idx) points
 
 
-sweepDirection : Int -> Int -> Int -> Bool
-sweepDirection left right idx =
+buildCircle : SweepPattern -> Int -> Int -> Int -> Int -> String
+buildCircle sweepPattern y l r idx =
+    case toFoo sweepPattern of
+        ( incDec, idxOdd, onDir ) ->
+            let
+                sweep =
+                    sweepDirection incDec idxOdd l r idx
+            in
+            if onDir then
+                if l < r then
+                    halfCircle y l r sweep
+
+                else
+                    halfCircle y r l sweep
+
+            else
+                halfCircle y l r sweep
+
+
+sweepDirection : IncDec -> OddIndex -> Int -> Int -> Int -> Bool
+sweepDirection incDec idxOdd left right idx =
     let
         forward =
             right - left > 0
@@ -297,15 +427,18 @@ sweepDirection left right idx =
         odd =
             modBy 2 idx == 1
     in
-    odd
+    case ( incDec, idxOdd ) of
+        ( True, True ) ->
+            forward && odd
 
+        ( True, False ) ->
+            forward
 
+        ( False, True ) ->
+            odd
 
--- odd
--- forward
--- odd
--- forward && odd
--- True
+        ( False, False ) ->
+            True
 
 
 halfCircle : Int -> Int -> Int -> Bool -> String
@@ -321,7 +454,20 @@ halfCircle startY startX endX orientation =
             else
                 0
     in
-    arc radius radius 0 sweepFlag endX startY
+    String.join " " [ point startX startY, arc radius radius 0 sweepFlag endX startY ]
+
+
+
+-- String.join " " [ point endX startY, arc radius radius 0 sweepFlag startX startY ]
+-- String.join " " [ arc radius radius 0 sweepFlag startX startY ]
+-- String.join " " [ arc radius radius 0 sweepFlag endX startY ]
+
+
+point : Int -> Int -> String
+point x y =
+    String.join " "
+        -- ("M" :: List.map String.fromInt [ 200, y ])
+        ("M" :: List.map String.fromInt [ x, y ])
 
 
 arc : Int -> Int -> Int -> Int -> Int -> Int -> String
