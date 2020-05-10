@@ -239,7 +239,7 @@ art viewport { count, root, scale } =
             400
     in
     div [ class "border bg-gray-100" ]
-        [ svg [ viewBox <| "0 0 " ++ mString ++ " " ++ mString ]
+        [ svg [ viewBox <| String.join " " [ "0 0", mString, mString ] ]
             [ path
                 [ d <| makeSvgPath startY pairsWithScale
                 , stroke "black"

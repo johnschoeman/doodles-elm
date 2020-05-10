@@ -4,6 +4,7 @@ import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
 import Doodle.Dots as Dots
+import Doodle.MothersDay as MothersDay
 import Doodle.Recaman as Recaman
 import Doodle.Squares as Squares
 import Home
@@ -40,6 +41,7 @@ type Model
     | Dots Dots.Model
     | Squares Squares.Model
     | Recaman Recaman.Model
+    | MothersDay MothersDay.Model
 
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -155,6 +157,9 @@ changeRouteTo maybeRoute model =
             Recaman.init session
                 |> updateWith Recaman HandleRecamanMsg
 
+        Just Route.MothersDay ->
+            ( MothersDay <| MothersDay.init session, Cmd.none )
+
 
 toSession : Model -> Session.Model
 toSession model =
@@ -175,6 +180,9 @@ toSession model =
             session
 
         Recaman { session } ->
+            session
+
+        MothersDay { session } ->
             session
 
 
@@ -228,6 +236,9 @@ pageContent model =
 
         Recaman m ->
             Html.map HandleRecamanMsg <| Recaman.view m
+
+        MothersDay m ->
+            MothersDay.view
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]
