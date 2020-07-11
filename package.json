@@ -9,7 +9,7 @@
     "tailwindcss": "^1.2.0"
   },
   "devDependencies": {
-    "create-elm-app": "^4.2.8",
+    "create-elm-app": "^4.2.26",
     "elm-format": "^0.8.3"
   },
   "scripts": {
