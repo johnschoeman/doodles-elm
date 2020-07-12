@@ -12,19 +12,20 @@ import Task
 import Time
 
 
-type alias XPos = Int
-type alias YPos = Int
-type alias XDelta = Int
-type alias YDelta = Int
+type alias Square =
+    { xPos : Int
+    , yPos : Int
+    , xDelta : Int
+    , yDelta : Int
+    , color : Color
+    }
 
-type alias Color = {
-  red: Float
-  , green: Float
-  , blue: Float
-  }
- 
-type Square
-    = Square Color XPos YPos XDelta YDelta
+
+type alias Color =
+    { red : Float
+    , green : Float
+    , blue : Float
+    }
 
 
 type alias Model =
@@ -40,39 +41,46 @@ type Msg
 
 
 red : Color
-red = {
-  red = 100,
-  green = 0,
-  blue = 0
-  }
+red =
+    { red = 100
+    , green = 0
+    , blue = 0
+    }
+
 
 green : Color
-green = {
-  red = 0
-  , green = 100
-  , blue = 0
-  }
+green =
+    { red = 0
+    , green = 100
+    , blue = 0
+    }
+
 
 blue : Color
-blue = {
-  red = 0
-  , green = 0
-  , blue = 100
-  }
+blue =
+    { red = 0
+    , green = 0
+    , blue = 100
+    }
+
 
 init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
       , squares =
-            [ Square red 100 200 1 1
-            , Square green 200 100 1 2
-            , Square blue 50 100 2 3
-            , Square red 300 20 2 1
-            , Square green 300 50 2 5
-            , Square blue 140 20 3 1
-            , Square red 90 20 2 2
-            , Square green 400 100 0 1
+            [ { xPos = 100
+              , yPos = 200
+              , xDelta = 1
+              , yDelta = 1
+              , color = red
+              }
+            , { xPos = 200
+              , yPos = 100
+              , xDelta = 2
+              , yDelta = 2
+              , color = green
+              }
             ]
       }
     , Task.perform GotViewport getViewport
@@ -111,7 +119,7 @@ tickSquares viewport squares =
 
 
 tickSquare : Viewport -> Square -> Square
-tickSquare viewport (Square color xPos yPos xDelta yDelta) =
+tickSquare viewport { xPos, yPos, xDelta, yDelta, color } =
     let
         { width, height } =
             viewport.viewport
@@ -121,25 +129,34 @@ tickSquare viewport (Square color xPos yPos xDelta yDelta) =
 
         newYPos =
             modBy (ceiling height) (yPos + yDelta)
-
     in
-    Square (nextColor color) newXPos newYPos xDelta yDelta
+    { xPos = newXPos
+    , yPos = newYPos
+    , xDelta = xDelta
+    , yDelta = yDelta
+    , color = nextColor color
+    }
 
 
 nextColor : Color -> Color
-nextColor color = 
-  let
-      nextValue c rate = 
-        toFloat <| modBy 255 (ceiling (c + rate))
+nextColor color =
+    let
+        nextValue c rate =
+            toFloat <| modBy 255 (ceiling (c + rate))
 
-      nextRed = nextValue color.red 0.001
-      nextGreen = nextValue color.green 0.003
-      nextBlue = nextValue color.blue 0.002
-  in
-  { red = nextRed
-  , green = nextGreen
-  , blue = nextBlue
-  }
+        nextRed =
+            nextValue color.red 0.001
+
+        nextGreen =
+            nextValue color.green 0.003
+
+        nextBlue =
+            nextValue color.blue 0.002
+    in
+    { red = nextRed
+    , green = nextGreen
+    , blue = nextBlue
+    }
 
 
 
@@ -184,14 +201,15 @@ art viewport model =
             (List.map squareSvg model.squares)
         ]
 
-colorToRGB: Color -> String
+
+colorToRGB : Color -> String
 colorToRGB color =
-            Color.fromRGB ( color.red, color.green, color.blue )
-                |> Color.toRGBString
+    Color.fromRGB ( color.red, color.green, color.blue )
+        |> Color.toRGBString
 
 
 squareSvg : Square -> Html msg
-squareSvg (Square color xPos yPos _ _) =
+squareSvg { xPos, yPos, color } =
     rect
         [ x <| String.fromInt xPos
         , y <| String.fromInt yPos
