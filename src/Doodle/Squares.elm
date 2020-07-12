@@ -5,6 +5,7 @@ import Browser.Events exposing (onAnimationFrame)
 import Color
 import Html exposing (Html, div, text)
 import Html.Attributes as Attr exposing (class, style, type_, value)
+import Random exposing (Generator, generate, int, pair)
 import Session exposing (WithSession)
 import Svg exposing (rect, svg)
 import Svg.Attributes exposing (fill, height, rx, ry, viewBox, width, x, y)
@@ -38,6 +39,8 @@ type alias Model =
 type Msg
     = GotViewport Viewport
     | Tick Time.Posix
+    | NewRandomSquare
+    | RandomSquare ( Int, Int )
 
 
 red : Color
@@ -64,26 +67,25 @@ blue =
     }
 
 
+generateRandomSquares : Int -> List (Cmd Msg) -> List (Cmd Msg)
+generateRandomSquares n list =
+    case n of
+        0 ->
+            list
+
+        _ ->
+            generateRandomSquares (n - 1) [ Task.succeed NewRandomSquare |> Task.perform identity ] ++ list
+
+
 init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
-      , squares =
-            [ { xPos = 100
-              , yPos = 200
-              , xDelta = 1
-              , yDelta = 1
-              , color = red
-              }
-            , { xPos = 200
-              , yPos = 100
-              , xDelta = 2
-              , yDelta = 2
-              , color = green
-              }
-            ]
+      , squares = []
       }
-    , Task.perform GotViewport getViewport
+    , Cmd.batch <|
+        Task.perform GotViewport getViewport
+            :: generateRandomSquares 200 []
     )
 
 
@@ -97,17 +99,25 @@ update msg model =
         GotViewport viewport ->
             ( { model | viewport = Just viewport }, Cmd.none )
 
-        Tick now ->
-            let
-                time =
-                    Debug.log <| Debug.toString now
+        NewRandomSquare ->
+            ( model, generate RandomSquare <| pair (int 0 400) (int 1 5) )
 
-                oldSquares =
-                    model.squares
+        RandomSquare ( randomPosition, randomDelta ) ->
+            let
+                newSquare =
+                    { xPos = randomPosition
+                    , yPos = randomPosition
+                    , xDelta = randomDelta
+                    , yDelta = randomDelta
+                    , color = red
+                    }
             in
+            ( { model | squares = newSquare :: model.squares }, Cmd.none )
+
+        Tick _ ->
             case model.viewport of
                 Just viewport ->
-                    ( { model | squares = tickSquares viewport oldSquares }, Cmd.none )
+                    ( { model | squares = tickSquares viewport model.squares }, Cmd.none )
 
                 Nothing ->
                     ( model, Cmd.none )
