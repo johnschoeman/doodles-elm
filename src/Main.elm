@@ -204,7 +204,7 @@ subscriptions model =
             Sub.map HandleHomeMsg <| Home.subscriptions homeModel
 
         Squares squareModel ->
-          Sub.map HandleSquaresMsg <| Squares.subscriptions
+            Sub.map HandleSquaresMsg <| Squares.subscriptions
 
         _ ->
             Sub.none
@@ -218,8 +218,7 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Doodles"
     , body =
-        [ h1 [] [ a [ Route.href Route.Home ] [ text "Doodles" ] ]
-        , pageContent model
+        [ pageContent model
         , pageFooter
         ]
     }
