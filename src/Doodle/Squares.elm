@@ -2,6 +2,7 @@ module Doodle.Squares exposing (Model, Msg, init, subscriptions, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events exposing (onAnimationFrame)
+import Color
 import Html exposing (Html, div, text)
 import Html.Attributes as Attr exposing (class, style, type_, value)
 import Session exposing (WithSession)
@@ -15,8 +16,12 @@ type alias XPos = Int
 type alias YPos = Int
 type alias XDelta = Int
 type alias YDelta = Int
-type Color = Red | Green | Blue
 
+type alias Color = {
+  red: Float
+  , green: Float
+  , blue: Float
+  }
  
 type Square
     = Square Color XPos YPos XDelta YDelta
@@ -34,15 +39,40 @@ type Msg
     | Tick Time.Posix
 
 
+red : Color
+red = {
+  red = 100,
+  green = 0,
+  blue = 0
+  }
+
+green : Color
+green = {
+  red = 0
+  , green = 100
+  , blue = 0
+  }
+
+blue : Color
+blue = {
+  red = 0
+  , green = 0
+  , blue = 100
+  }
+
 init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
       , squares =
-            [ Square Red 100 200 10 10
-            , Square Green 200 100 1 2
-            , Square Blue 50 100 2 3
-            , Square Red 300 20 2 1
+            [ Square red 100 200 1 1
+            , Square green 200 100 1 2
+            , Square blue 50 100 2 3
+            , Square red 300 20 2 1
+            , Square green 300 50 2 5
+            , Square blue 140 20 3 1
+            , Square red 90 20 2 2
+            , Square green 400 100 0 1
             ]
       }
     , Task.perform GotViewport getViewport
@@ -98,10 +128,20 @@ tickSquare viewport (Square color xPos yPos xDelta yDelta) =
 
 nextColor : Color -> Color
 nextColor color = 
-  case color of
-    Red -> Green
-    Green -> Blue
-    Blue -> Red
+  let
+      nextValue c rate = 
+        toFloat <| modBy 255 (ceiling (c + rate))
+
+      nextRed = nextValue color.red 0.001
+      nextGreen = nextValue color.green 0.003
+      nextBlue = nextValue color.blue 0.002
+  in
+  { red = nextRed
+  , green = nextGreen
+  , blue = nextBlue
+  }
+
+
 
 ---- SUBSCRIPTIONS ----
 
@@ -144,19 +184,18 @@ art viewport model =
             (List.map squareSvg model.squares)
         ]
 
-showColor: Color -> String
-showColor color =
-  case color of
-    Red -> "red"
-    Green -> "green"
-    Blue -> "blue"
+colorToRGB: Color -> String
+colorToRGB color =
+            Color.fromRGB ( color.red, color.green, color.blue )
+                |> Color.toRGBString
+
 
 squareSvg : Square -> Html msg
 squareSvg (Square color xPos yPos _ _) =
     rect
         [ x <| String.fromInt xPos
         , y <| String.fromInt yPos
-        , fill <| showColor color
+        , fill <| colorToRGB color
         , width "100"
         , height "100"
         , rx "2"
