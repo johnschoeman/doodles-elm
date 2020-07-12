@@ -5,7 +5,7 @@ import Browser.Events exposing (onAnimationFrame)
 import Color
 import Html exposing (Html, div, text)
 import Html.Attributes as Attr exposing (class, style, type_, value)
-import Random exposing (Generator, generate, int, pair)
+import Random
 import Session exposing (WithSession)
 import Svg exposing (rect, svg)
 import Svg.Attributes exposing (fill, height, rx, ry, viewBox, width, x, y)
@@ -85,7 +85,7 @@ init session =
       }
     , Cmd.batch <|
         Task.perform GotViewport getViewport
-            :: generateRandomSquares 200 []
+            :: generateRandomSquares 250 []
     )
 
 
@@ -100,7 +100,7 @@ update msg model =
             ( { model | viewport = Just viewport }, Cmd.none )
 
         NewRandomSquare ->
-            ( model, generate RandomSquare <| pair (int 0 400) (int 1 5) )
+            ( model, Random.generate RandomSquare <| Random.pair (Random.int 0 100) (Random.int 0 20) )
 
         RandomSquare ( randomPosition, randomDelta ) ->
             let
@@ -224,8 +224,8 @@ squareSvg { xPos, yPos, color } =
         [ x <| String.fromInt xPos
         , y <| String.fromInt yPos
         , fill <| colorToRGB color
-        , width "100"
-        , height "100"
+        , width "50"
+        , height "50"
         , rx "2"
         , ry "2"
         ]
