@@ -4,7 +4,7 @@ import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events exposing (onAnimationFrame)
 import Color
 import Html exposing (Html, div, text)
-import Html.Attributes as Attr exposing (class, style, type_, value)
+import Html.Attributes exposing (class)
 import Random
 import Random.Extra as RandomExtra
 import Session exposing (WithSession)
@@ -44,30 +44,6 @@ type Msg
     | RandomSquare Square
 
 
-red : Color
-red =
-    { red = 100
-    , green = 0
-    , blue = 0
-    }
-
-
-green : Color
-green =
-    { red = 0
-    , green = 100
-    , blue = 0
-    }
-
-
-blue : Color
-blue =
-    { red = 0
-    , green = 0
-    , blue = 100
-    }
-
-
 generateRandomSquares : Int -> List (Cmd Msg) -> List (Cmd Msg)
 generateRandomSquares n list =
     case n of
@@ -86,7 +62,7 @@ init session =
       }
     , Cmd.batch <|
         Task.perform GotViewport getViewport
-            :: generateRandomSquares 250 []
+            :: generateRandomSquares 200 []
     )
 
 
@@ -106,7 +82,7 @@ randomPosition =
             0
 
         maxPos =
-            100
+            800
     in
     Random.int minPos maxPos
 
@@ -123,9 +99,14 @@ randomDelta =
     Random.int minDelta maxDelta
 
 
+randomRGBValue : Random.Generator Float
+randomRGBValue =
+    Random.float 0 255
+
+
 randomColor : Random.Generator Color
 randomColor =
-    Random.uniform red [ green, blue ]
+    Random.map3 Color randomRGBValue randomRGBValue randomRGBValue
 
 
 newRandomSquare : Cmd Msg
@@ -202,10 +183,10 @@ nextColor color =
             nextValue color.red 0.001
 
         nextGreen =
-            nextValue color.green 0.003
+            nextValue color.green 0.002
 
         nextBlue =
-            nextValue color.blue 0.002
+            nextValue color.blue 0.003
     in
     { red = nextRed
     , green = nextGreen
@@ -268,8 +249,8 @@ squareSvg { xPos, yPos, color } =
         [ x <| String.fromInt xPos
         , y <| String.fromInt yPos
         , fill <| colorToRGB color
-        , width "50"
-        , height "50"
+        , width "20"
+        , height "20"
         , rx "2"
         , ry "2"
         ]
