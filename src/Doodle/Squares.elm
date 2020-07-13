@@ -101,12 +101,26 @@ randomSquare =
 
 randomPosition : Random.Generator Int
 randomPosition =
-    Random.int 0 400
+    let
+        minPos =
+            0
+
+        maxPos =
+            100
+    in
+    Random.int minPos maxPos
 
 
 randomDelta : Random.Generator Int
 randomDelta =
-    Random.int 1 10
+    let
+        minDelta =
+            1
+
+        maxDelta =
+            5
+    in
+    Random.int minDelta maxDelta
 
 
 randomColor : Random.Generator Color
