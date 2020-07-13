@@ -6,6 +6,7 @@ import Color
 import Html exposing (Html, div, text)
 import Html.Attributes as Attr exposing (class, style, type_, value)
 import Random
+import Random.Extra as RandomExtra
 import Session exposing (WithSession)
 import Svg exposing (rect, svg)
 import Svg.Attributes exposing (fill, height, rx, ry, viewBox, width, x, y)
@@ -40,7 +41,7 @@ type Msg
     = GotViewport Viewport
     | Tick Time.Posix
     | NewRandomSquare
-    | RandomSquare ( Int, Int )
+    | RandomSquare Square
 
 
 red : Color
@@ -89,6 +90,35 @@ init session =
     )
 
 
+randomSquare : Random.Generator Square
+randomSquare =
+    Random.map Square randomPosition
+        |> RandomExtra.andMap randomPosition
+        |> RandomExtra.andMap randomDelta
+        |> RandomExtra.andMap randomDelta
+        |> RandomExtra.andMap randomColor
+
+
+randomPosition : Random.Generator Int
+randomPosition =
+    Random.int 0 400
+
+
+randomDelta : Random.Generator Int
+randomDelta =
+    Random.int 1 10
+
+
+randomColor : Random.Generator Color
+randomColor =
+    Random.uniform red [ green, blue ]
+
+
+newRandomSquare : Cmd Msg
+newRandomSquare =
+    Random.generate RandomSquare randomSquare
+
+
 
 ---- UPDATE ----
 
@@ -100,16 +130,16 @@ update msg model =
             ( { model | viewport = Just viewport }, Cmd.none )
 
         NewRandomSquare ->
-            ( model, Random.generate RandomSquare <| Random.pair (Random.int 0 100) (Random.int 0 20) )
+            ( model, newRandomSquare )
 
-        RandomSquare ( randomPosition, randomDelta ) ->
+        RandomSquare { xPos, yPos, xDelta, yDelta, color } ->
             let
                 newSquare =
-                    { xPos = randomPosition
-                    , yPos = randomPosition
-                    , xDelta = randomDelta
-                    , yDelta = randomDelta
-                    , color = red
+                    { xPos = xPos
+                    , yPos = yPos
+                    , xDelta = xDelta
+                    , yDelta = yDelta
+                    , color = color
                     }
             in
             ( { model | squares = newSquare :: model.squares }, Cmd.none )

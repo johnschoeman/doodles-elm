@@ -13,12 +13,14 @@
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
+            "elm-community/random-extra": "3.1.0",
             "tesk9/palette": "2.0.0",
             "the-sett/lazy-list": "1.1.1"
         },
         "indirect": {
             "elm/json": "1.1.2",
-            "elm/virtual-dom": "1.0.2"
+            "elm/virtual-dom": "1.0.2",
+            "owanturist/elm-union-find": "1.0.0"
         }
     },
     "test-dependencies": {
