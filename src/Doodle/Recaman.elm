@@ -349,7 +349,6 @@ art viewport { sweepPattern, count, root, scale } =
         startY =
             400
     in
-
     div [ class "border bg-gray-100" ]
         [ svg [ viewBox <| String.join " " [ "0 0", mString, mString ] ]
             [ path

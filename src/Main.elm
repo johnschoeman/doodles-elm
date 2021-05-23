@@ -204,7 +204,7 @@ subscriptions model =
             Sub.map HandleHomeMsg <| Home.subscriptions homeModel
 
         Squares squareModel ->
-          Sub.map HandleSquaresMsg <| Squares.subscriptions
+            Sub.map HandleSquaresMsg <| Squares.subscriptions
 
         _ ->
             Sub.none

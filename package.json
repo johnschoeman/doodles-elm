@@ -2,6 +2,12 @@
   "name": "doodles",
   "version": "1.0.0",
   "description": "This project is bootstrapped with [Create Elm App](https://github.com/halfzebra/create-elm-app).",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-css": "npx tailwindcss build src/main.css -o src/output.css",
+    "build": "elm-format --validate src/ && yarn build-css && elm-app build",
+    "start": "elm-app start"
+  },
   "directories": {
     "test": "tests"
   },
@@ -9,14 +15,8 @@
     "tailwindcss": "^1.2.0"
   },
   "devDependencies": {
-    "create-elm-app": "^4.2.26",
+    "create-elm-app": "^5.22.0",
     "elm-format": "^0.8.3"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build-css": "npx tailwindcss build src/main.css -o src/output.css",
-    "build": "elm-format --validate src/ && yarn build-css && elm-app build",
-    "start": "elm-app start"
   },
   "repository": {
     "type": "git",
