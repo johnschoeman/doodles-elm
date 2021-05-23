@@ -9,6 +9,7 @@ import Doodle.Recaman as Recaman
 import Doodle.Squares as Squares
 import Home
 import Html exposing (Html, a, div, footer, h1, h2, text)
+import Html.Attributes exposing (class)
 import Route
 import Session
 import Url
@@ -218,7 +219,7 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Doodles"
     , body =
-        [ h1 [] [ a [ Route.href Route.Home ] [ text "Doodles" ] ]
+        [ h1 [ class "ml-4 py-2 text-lg" ] [ a [ Route.href Route.Home ] [ text "Doodles" ] ]
         , pageContent model
         , pageFooter
         ]

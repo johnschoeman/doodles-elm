@@ -21,7 +21,7 @@ init session =
 
 view : Model -> Html msg
 view model =
-    div [ class "flex flex-col" ]
+    div [ class "flex flex-col ml-4 space-y-4" ]
         [ a [ Route.href Route.Dots ] [ text "Dots" ]
         , a [ Route.href Route.Squares ] [ text "Squares" ]
         , a [ Route.href Route.Recaman ] [ text "Recaman" ]

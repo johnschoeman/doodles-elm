@@ -1,7 +1,7 @@
 {
   "name": "doodles",
   "version": "1.0.0",
-  "description": "This project is bootstrapped with [Create Elm App](https://github.com/halfzebra/create-elm-app).",
+  "description": "This project is a playground for browser doodles",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-css": "npx tailwindcss build src/main.css -o src/output.css",
@@ -12,20 +12,22 @@
     "test": "tests"
   },
   "dependencies": {
-    "tailwindcss": "^1.2.0"
+    "autoprefixer": "^10.2.5",
+    "create-elm-app": "^5.22.0",
+    "elm-format": "^0.8.5",
+    "postcss": "^8.3.0",
+    "tailwindcss": "^2.1.2"
   },
   "devDependencies": {
-    "create-elm-app": "^5.22.0",
-    "elm-format": "^0.8.3"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kellymccann91/doodles.git"
+    "url": "git+https://github.com/johnschoeman/doodles.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kellymccann91/doodles/issues"
+    "url": "https://github.com/johnschoeman/doodles/issues"
   },
-  "homepage": "https://github.com/kellymccann91/doodles#readme"
+  "homepage": "https://github.com/johnschoeman/doodles#readme"
 }
