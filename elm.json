@@ -13,6 +13,7 @@
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
+            "elm-community/list-extra": "8.3.0",
             "tesk9/palette": "2.0.0",
             "the-sett/lazy-list": "1.1.1"
         },

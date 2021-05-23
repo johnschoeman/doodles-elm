@@ -18,6 +18,7 @@ type Route
     | Squares
     | Recaman
     | MothersDay
+    | LockPuzzle
 
 
 parser : Parser (Route -> a) a
@@ -28,6 +29,7 @@ parser =
         , Parser.map Squares (s "doodles" </> s "squares")
         , Parser.map Recaman (s "doodles" </> s "recaman")
         , Parser.map MothersDay (s "doodles" </> s "mom")
+        , Parser.map LockPuzzle (s "doodles" </> s "lock_puzzle")
         ]
 
 
@@ -66,5 +68,8 @@ routeToString page =
 
                 MothersDay ->
                     [ "doodles", "mom" ]
+
+                LockPuzzle ->
+                    [ "doodles", "lock_puzzle" ]
     in
     "#/" ++ String.join "/" pieces

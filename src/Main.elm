@@ -4,6 +4,7 @@ import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
 import Doodle.Dots as Dots
+import Doodle.LockPuzzle as LockPuzzle
 import Doodle.MothersDay as MothersDay
 import Doodle.Recaman as Recaman
 import Doodle.Squares as Squares
@@ -43,6 +44,7 @@ type Model
     | Squares Squares.Model
     | Recaman Recaman.Model
     | MothersDay MothersDay.Model
+    | LockPuzzle LockPuzzle.Model
 
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -67,6 +69,7 @@ type Msg
     | HandleDotsMsg Dots.Msg
     | HandleSquaresMsg Squares.Msg
     | HandleRecamanMsg Recaman.Msg
+    | HandleLockPuzzleMsg LockPuzzle.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -128,6 +131,15 @@ update msg model =
             , Cmd.map HandleRecamanMsg newMsg
             )
 
+        ( HandleLockPuzzleMsg subMsg, LockPuzzle model_ ) ->
+            let
+                ( newModel, newMsg ) =
+                    LockPuzzle.update subMsg model_
+            in
+            ( LockPuzzle newModel
+            , Cmd.map HandleLockPuzzleMsg newMsg
+            )
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
@@ -161,6 +173,10 @@ changeRouteTo maybeRoute model =
         Just Route.MothersDay ->
             ( MothersDay <| MothersDay.init session, Cmd.none )
 
+        Just Route.LockPuzzle ->
+            LockPuzzle.init session
+                |> updateWith LockPuzzle HandleLockPuzzleMsg
+
 
 toSession : Model -> Session.Model
 toSession model =
@@ -184,6 +200,9 @@ toSession model =
             session
 
         MothersDay { session } ->
+            session
+
+        LockPuzzle { session } ->
             session
 
 
@@ -243,6 +262,9 @@ pageContent model =
 
         MothersDay m ->
             MothersDay.view
+
+        LockPuzzle m ->
+            Html.map HandleLockPuzzleMsg <| LockPuzzle.view m
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]

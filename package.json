@@ -15,11 +15,11 @@
     "autoprefixer": "^10.2.5",
     "create-elm-app": "^5.22.0",
     "elm-format": "^0.8.5",
+    "global": "^4.4.0",
     "postcss": "^8.3.0",
     "tailwindcss": "^2.1.2"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/johnschoeman/doodles.git"
