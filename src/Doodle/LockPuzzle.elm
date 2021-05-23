@@ -1,6 +1,7 @@
 module Doodle.LockPuzzle exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
+import FeatherIcons
 import Html exposing (Html, div, input, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -37,7 +38,7 @@ buildBoard size =
 
 buildRow : Int -> List Cell
 buildRow size =
-    List.repeat size On
+    List.repeat size Off
 
 
 init : Session.Model -> ( Model, Cmd Msg )
@@ -93,6 +94,16 @@ updateCell clickedRowIdx clickedColIdx rowIdx colIdx cell =
         cell
 
 
+isOn : Cell -> Bool
+isOn cell =
+    cell == On
+
+
+solved : Board -> Bool
+solved board =
+    List.all (\row -> List.all isOn row) board
+
+
 
 ---- VIEW ----
 
@@ -101,7 +112,10 @@ view : Model -> Html Msg
 view model =
     case model.viewport of
         Just viewport ->
-            div [ class "p-8" ] (boardRows model.board)
+            div [ class "w-full p-8 flex flex-row" ]
+                [ div [] (boardRows model.board)
+                , div [ class "w-full flex justify-center items-center" ] [ solvedStatus model.board ]
+                ]
 
         Nothing ->
             div [] [ text "loading..." ]
@@ -121,7 +135,22 @@ cellToHtml : Int -> Int -> Cell -> Html Msg
 cellToHtml rowIdx colIdx cell =
     case cell of
         On ->
-            div [ class "w-48 h-48 bg-gray-800 border-gray-100 border", onClick (ClickedCell rowIdx colIdx) ] []
+            div [ class "w-48 h-48 bg-gray-100 border-gray-800", onClick (ClickedCell rowIdx colIdx) ] []
 
         Off ->
-            div [ class "w-48 h-48 bg-gray-100 border-gray-800", onClick (ClickedCell rowIdx colIdx) ] []
+            div [ class "w-48 h-48 bg-gray-800 border-gray-100 border", onClick (ClickedCell rowIdx colIdx) ] []
+
+
+solvedStatus : Board -> Html Msg
+solvedStatus board =
+    if solved board then
+        div [ class "w-16 h-16 rounded-full bg-green-500 text-gray-100 flex items-center justify-center" ]
+            [ FeatherIcons.unlock
+                |> FeatherIcons.toHtml []
+            ]
+
+    else
+        div [ class "w-16 h-16 rounded-full bg-gray-800 text-gray-100 flex items-center justify-center" ]
+            [ FeatherIcons.lock
+                |> FeatherIcons.toHtml []
+            ]
