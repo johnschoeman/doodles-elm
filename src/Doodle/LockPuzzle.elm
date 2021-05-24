@@ -6,6 +6,7 @@ import Html exposing (Html, div, input, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import List.Extra exposing (updateAt)
+import Random
 import Session exposing (WithSession)
 import Task
 
@@ -14,6 +15,7 @@ type alias Model =
     WithSession
         { viewport : Maybe Viewport
         , board : Board
+        , moveCount : Int
         }
 
 
@@ -26,9 +28,14 @@ type Cell
     | Off
 
 
+boardSize : Int
+boardSize =
+    4
+
+
 initialBoard : Board
 initialBoard =
-    buildBoard 4
+    buildBoard boardSize
 
 
 buildBoard : Int -> Board
@@ -41,18 +48,36 @@ buildRow size =
     List.repeat size Off
 
 
+randomBoard : Random.Generator Board
+randomBoard =
+    Random.list boardSize (Random.list boardSize randomCell)
+
+
+randomCell : Random.Generator Cell
+randomCell =
+    Random.uniform On [ Off ]
+
+
+generateBoard : Cmd Msg
+generateBoard =
+    Random.generate ResetGame randomBoard
+
+
 init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
       , board = initialBoard
+      , moveCount = 0
       }
-    , Task.perform GotViewport getViewport
+    , Cmd.batch [ Task.perform GotViewport getViewport, generateBoard ]
     )
 
 
 type Msg
     = GotViewport Viewport
+    | ResetGame Board
+    | GetRandomBoard
     | ClickedCell Int Int
 
 
@@ -62,12 +87,21 @@ update msg model =
         GotViewport viewport ->
             ( { model | viewport = Just viewport }, Cmd.none )
 
+        ResetGame board ->
+            ( { model | board = board, moveCount = 0 }, Cmd.none )
+
+        GetRandomBoard ->
+            ( model, generateBoard )
+
         ClickedCell row col ->
             let
                 nextBoard =
                     updateBoard row col model.board
+
+                nextMoveCount =
+                    model.moveCount + 1
             in
-            ( { model | board = nextBoard }, Cmd.none )
+            ( { model | board = nextBoard, moveCount = nextMoveCount }, Cmd.none )
 
 
 updateBoard : Int -> Int -> Board -> Board
@@ -114,7 +148,13 @@ view model =
         Just viewport ->
             div [ class "w-full p-8 flex flex-row" ]
                 [ div [] (boardRows model.board)
-                , div [ class "w-full flex justify-center items-center" ] [ solvedStatus model.board ]
+                , div [ class "w-full flex flex-col" ]
+                    [ div [ class "flex flex-row w-full justify-around items-center" ]
+                        [ div [ onClick GetRandomBoard ] [ resetIcon ]
+                        , div [] [ text <| String.fromInt model.moveCount ]
+                        ]
+                    , div [ class "w-full h-full flex justify-center items-center" ] [ solvedStatus model.board ]
+                    ]
                 ]
 
         Nothing ->
@@ -150,7 +190,14 @@ solvedStatus board =
             ]
 
     else
-        div [ class "w-16 h-16 rounded-full bg-gray-800 text-gray-100 flex items-center justify-center" ]
+        div [ class "w-16 h-16 rounded-full border-2 border-gray-800 bg-gray-100 text-gray-800 flex items-center justify-center" ]
             [ FeatherIcons.lock
                 |> FeatherIcons.toHtml []
             ]
+
+
+resetIcon : Html Msg
+resetIcon =
+    div [ class "w-12 h-12 rounded-md bg-purple-700 text-gray-100 flex items-center justify-center" ]
+        [ FeatherIcons.refreshCw |> FeatherIcons.toHtml []
+        ]
