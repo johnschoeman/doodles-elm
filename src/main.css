@@ -2,7 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-.dot-box {
-  height: 65vmin;
-  width: 65vmin;
+
+@layer utilities {
+  @variants responsive {
+    .dot-box {
+      height: 65vmin;
+      width: 65vmin;
+    }
+
+    .half-square {
+      height: 50vw;
+      width: 50vw;
+    }
+
+    .full-square {
+      height: 90vw;
+      width: 90vw;
+    }
+  }
 }

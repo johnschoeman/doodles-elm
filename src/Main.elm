@@ -238,11 +238,18 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Doodles"
     , body =
-        [ h1 [ class "ml-4 py-2 text-lg" ] [ a [ Route.href Route.Home ] [ text "Doodles" ] ]
+        [ header
         , pageContent model
         , pageFooter
         ]
     }
+
+
+header : Html Msg
+header =
+    h1 [ class "ml-4 py-2 text-lg" ]
+        [ a [ Route.href Route.Home ] [ text "doodles.camp" ]
+        ]
 
 
 pageContent : Model -> Html Msg

@@ -2,7 +2,7 @@ module Doodle.LockPuzzle exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import FeatherIcons
-import Html exposing (Html, div, input, text)
+import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import List.Extra exposing (updateAt)
@@ -146,19 +146,29 @@ view : Model -> Html Msg
 view model =
     case model.viewport of
         Just viewport ->
-            div [ class "w-full p-8 flex flex-row" ]
-                [ div [] (boardRows model.board)
-                , div [ class "w-full flex flex-col" ]
-                    [ div [ class "flex flex-row w-full justify-around items-center" ]
-                        [ div [ onClick GetRandomBoard ] [ resetIcon ]
-                        , div [] [ text <| String.fromInt model.moveCount ]
-                        ]
-                    , div [ class "w-full h-full flex justify-center items-center" ] [ solvedStatus model.board ]
-                    ]
+            div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
+                [ div [ class "flex-1 flex justify-center" ] [ gameBoard model ]
+                , div [ class "flex-1" ] [ gameControls model ]
                 ]
 
         Nothing ->
             div [] [ text "loading..." ]
+
+
+gameControls : Model -> Html Msg
+gameControls model =
+    div [ class "flex flex-row lg:flex-col p-8" ]
+        [ div [ class "flex flex-row w-full justify-around items-center" ]
+            [ button [ onClick GetRandomBoard ] [ resetIcon ]
+            , div [] [ text <| String.fromInt model.moveCount ]
+            ]
+        , div [ class "w-full h-full flex justify-center items-center" ] [ solvedStatus model.board ]
+        ]
+
+
+gameBoard : Model -> Html Msg
+gameBoard model =
+    div [ class "full-square lg:half-square flex flex-col" ] (boardRows model.board)
 
 
 boardRows : Board -> List (Html Msg)
@@ -168,17 +178,17 @@ boardRows board =
 
 rowToCell : Int -> List Cell -> Html Msg
 rowToCell rowIdx row =
-    div [ class "flex flex-row" ] (List.indexedMap (\colIdx cell -> cellToHtml rowIdx colIdx cell) row)
+    div [ class "w-full flex-1 flex flex-row" ] (List.indexedMap (\colIdx cell -> cellToHtml rowIdx colIdx cell) row)
 
 
 cellToHtml : Int -> Int -> Cell -> Html Msg
 cellToHtml rowIdx colIdx cell =
     case cell of
         On ->
-            div [ class "w-48 h-48 bg-gray-100 border-gray-800", onClick (ClickedCell rowIdx colIdx) ] []
+            button [ class "flex-1 bg-gray-100 border-gray-200 border", onClick (ClickedCell rowIdx colIdx) ] []
 
         Off ->
-            div [ class "w-48 h-48 bg-gray-800 border-gray-100 border", onClick (ClickedCell rowIdx colIdx) ] []
+            button [ class "flex-1 bg-gray-800 border-gray-100 border", onClick (ClickedCell rowIdx colIdx) ] []
 
 
 solvedStatus : Board -> Html Msg
@@ -198,6 +208,6 @@ solvedStatus board =
 
 resetIcon : Html Msg
 resetIcon =
-    div [ class "w-12 h-12 rounded-md bg-purple-700 text-gray-100 flex items-center justify-center" ]
+    button [ class "w-12 h-12 rounded-md bg-purple-700 text-gray-100 flex items-center justify-center" ]
         [ FeatherIcons.refreshCw |> FeatherIcons.toHtml []
         ]
