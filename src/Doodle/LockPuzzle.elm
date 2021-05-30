@@ -2,9 +2,9 @@ module Doodle.LockPuzzle exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import FeatherIcons
-import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes as Attr exposing (class, classList, style, type_, value)
+import Html.Events exposing (onClick, onInput)
 import List.Extra exposing (updateAt)
 import Random
 import Session exposing (WithSession)
@@ -16,6 +16,7 @@ type alias Model =
         { viewport : Maybe Viewport
         , board : Board
         , moveCount : Int
+        , boardSize : Int
         }
 
 
@@ -28,16 +29,6 @@ type Cell
     | Off
 
 
-boardSize : Int
-boardSize =
-    4
-
-
-initialBoard : Board
-initialBoard =
-    buildBoard boardSize
-
-
 buildBoard : Int -> Board
 buildBoard size =
     List.repeat size (buildRow size)
@@ -48,8 +39,8 @@ buildRow size =
     List.repeat size Off
 
 
-randomBoard : Random.Generator Board
-randomBoard =
+randomBoard : Int -> Random.Generator Board
+randomBoard boardSize =
     Random.list boardSize (Random.list boardSize randomCell)
 
 
@@ -58,9 +49,29 @@ randomCell =
     Random.uniform On [ Off ]
 
 
-generateBoard : Cmd Msg
-generateBoard =
-    Random.generate ResetGame randomBoard
+generateBoard : Int -> Cmd Msg
+generateBoard boardSize =
+    Random.generate ResetGame (randomBoard boardSize)
+
+
+initialBoard : Board
+initialBoard =
+    buildBoard 4
+
+
+threeByThreeBoard : Board
+threeByThreeBoard =
+    [ [ Off, On, Off ], [ On, On, On ], [ On, On, On ] ]
+
+
+fiveByFiveBoard : Board
+fiveByFiveBoard =
+    [ [ On, On, On, On, On ]
+    , [ On, On, On, On, On ]
+    , [ On, On, On, On, On ]
+    , [ On, On, On, On, On ]
+    , [ On, On, On, On, On ]
+    ]
 
 
 init : Session.Model -> ( Model, Cmd Msg )
@@ -69,8 +80,9 @@ init session =
       , viewport = Nothing
       , board = initialBoard
       , moveCount = 0
+      , boardSize = 4
       }
-    , Cmd.batch [ Task.perform GotViewport getViewport, generateBoard ]
+    , Cmd.batch [ Task.perform GotViewport getViewport, generateBoard 4 ]
     )
 
 
@@ -79,6 +91,7 @@ type Msg
     | ResetGame Board
     | GetRandomBoard
     | ClickedCell Int Int
+    | UpdateBoardSize Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -91,7 +104,7 @@ update msg model =
             ( { model | board = board, moveCount = 0 }, Cmd.none )
 
         GetRandomBoard ->
-            ( model, generateBoard )
+            ( model, generateBoard model.boardSize )
 
         ClickedCell row col ->
             let
@@ -102,6 +115,9 @@ update msg model =
                     model.moveCount + 1
             in
             ( { model | board = nextBoard, moveCount = nextMoveCount }, Cmd.none )
+
+        UpdateBoardSize size ->
+            ( { model | boardSize = size }, generateBoard size )
 
 
 updateBoard : Int -> Int -> Board -> Board
@@ -155,15 +171,8 @@ view model =
             div [] [ text "loading..." ]
 
 
-gameControls : Model -> Html Msg
-gameControls model =
-    div [ class "flex flex-row lg:flex-col p-8" ]
-        [ div [ class "flex flex-row w-full justify-around items-center" ]
-            [ button [ onClick GetRandomBoard ] [ resetIcon ]
-            , div [] [ text <| String.fromInt model.moveCount ]
-            ]
-        , div [ class "w-full h-full flex justify-center items-center" ] [ solvedStatus model.board ]
-        ]
+
+---- Board ----
 
 
 gameBoard : Model -> Html Msg
@@ -191,6 +200,59 @@ cellToHtml rowIdx colIdx cell =
             button [ class "flex-1 bg-gray-800 border-gray-100 border", onClick (ClickedCell rowIdx colIdx) ] []
 
 
+
+---- Controls ----
+
+
+gameControls : Model -> Html Msg
+gameControls model =
+    div [ class "flex-col p-8" ]
+        [ div [ class "flex flex-row mb-10 pb-10 justify-around items-center border-b border-gray-400" ]
+            [ div [ class "flex-1 flex justify-center items-center" ] [ solvedStatus model.board ]
+            , div
+                [ class "flex-1 flex justify-center items-center text-4xl font-black text-gray-800"
+                , classList [ ( "text-green-500", solved model.board ) ]
+                ]
+                [ text <| String.fromInt model.moveCount ]
+            ]
+        , div [ class "flex flex-row justify-around items-center" ]
+            [ div [ class "" ]
+                [ button
+                    [ onClick GetRandomBoard
+                    , class "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    ]
+                    [ resetIcon ]
+                ]
+            , div [ class "w-1/2" ]
+                [ label [ class "block text-sm font-medium text-gray-700" ] [ text "Size" ]
+                , div [ class "mt-1 relative rounded-md shadow-sm" ] [ numberInput 2 12 model.boardSize UpdateBoardSize ]
+                ]
+            ]
+        ]
+
+
+numberInput : Int -> Int -> Int -> (Int -> msg) -> Html msg
+numberInput minValue maxValue n toMsg =
+    let
+        f v =
+            case String.toInt v of
+                Just i ->
+                    toMsg i
+
+                Nothing ->
+                    toMsg 0
+    in
+    input
+        [ type_ "number"
+        , Attr.min <| String.fromInt minValue
+        , Attr.max <| String.fromInt maxValue
+        , value <| String.fromInt n
+        , onInput f
+        , class "block w-full p-1 pl-2 border-gray-500 border focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+        ]
+        []
+
+
 solvedStatus : Board -> Html Msg
 solvedStatus board =
     if solved board then
@@ -208,6 +270,4 @@ solvedStatus board =
 
 resetIcon : Html Msg
 resetIcon =
-    button [ class "w-12 h-12 rounded-md bg-purple-700 text-gray-100 flex items-center justify-center" ]
-        [ FeatherIcons.refreshCw |> FeatherIcons.toHtml []
-        ]
+    FeatherIcons.refreshCw |> FeatherIcons.toHtml []
