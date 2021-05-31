@@ -3,6 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
+import Doodle.BlackSheep as BlackSheep
 import Doodle.Dots as Dots
 import Doodle.LockPuzzle as LockPuzzle
 import Doodle.MothersDay as MothersDay
@@ -45,6 +46,7 @@ type Model
     | Recaman Recaman.Model
     | MothersDay MothersDay.Model
     | LockPuzzle LockPuzzle.Model
+    | BlackSheep BlackSheep.Model
 
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -70,6 +72,7 @@ type Msg
     | HandleSquaresMsg Squares.Msg
     | HandleRecamanMsg Recaman.Msg
     | HandleLockPuzzleMsg LockPuzzle.Msg
+    | HandleBlackSheepMsg BlackSheep.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -140,6 +143,15 @@ update msg model =
             , Cmd.map HandleLockPuzzleMsg newMsg
             )
 
+        ( HandleBlackSheepMsg subMsg, BlackSheep model_ ) ->
+            let
+                ( newModel, newMsg ) =
+                    BlackSheep.update subMsg model_
+            in
+            ( BlackSheep newModel
+            , Cmd.map HandleBlackSheepMsg newMsg
+            )
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
@@ -177,6 +189,10 @@ changeRouteTo maybeRoute model =
             LockPuzzle.init session
                 |> updateWith LockPuzzle HandleLockPuzzleMsg
 
+        Just Route.BlackSheep ->
+            BlackSheep.init session
+                |> updateWith BlackSheep HandleBlackSheepMsg
+
 
 toSession : Model -> Session.Model
 toSession model =
@@ -203,6 +219,9 @@ toSession model =
             session
 
         LockPuzzle { session } ->
+            session
+
+        BlackSheep { session } ->
             session
 
 
@@ -272,6 +291,9 @@ pageContent model =
 
         LockPuzzle m ->
             Html.map HandleLockPuzzleMsg <| LockPuzzle.view m
+
+        BlackSheep m ->
+            Html.map HandleBlackSheepMsg <| BlackSheep.view m
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]

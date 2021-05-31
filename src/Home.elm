@@ -27,6 +27,7 @@ view model =
         , a [ Route.href Route.Recaman ] [ text "Recaman" ]
         , a [ Route.href Route.MothersDay ] [ text "MothersDay" ]
         , a [ Route.href Route.LockPuzzle ] [ text "Lock Puzzle" ]
+        , a [ Route.href Route.BlackSheep ] [ text "BlackSheep" ]
         ]
 
 
