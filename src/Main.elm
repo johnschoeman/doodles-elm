@@ -266,7 +266,7 @@ view model =
 
 header : Html Msg
 header =
-    Html.header [ class "border-b border-gray-400 py-4 mb-4" ]
+    Html.header [ class "border-b border-gray-400 py-4" ]
         [ h1 [ class "ml-4 text-2xl" ]
             [ a [ Route.href Route.Home, class "lnk" ] [ text "doodles.camp" ]
             ]

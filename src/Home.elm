@@ -21,13 +21,14 @@ init session =
 
 view : Model -> Html msg
 view model =
-    div [ class "flex flex-col ml-4 space-y-4" ]
-        [ a [ class "lnk", Route.href Route.Dots ] [ text "Dots" ]
-        , a [ class "lnk", Route.href Route.Squares ] [ text "Squares" ]
-        , a [ class "lnk", Route.href Route.Recaman ] [ text "Recaman" ]
-        , a [ class "lnk", Route.href Route.MothersDay ] [ text "Mothers Day" ]
-        , a [ class "lnk", Route.href Route.LockPuzzle ] [ text "Lock Puzzle" ]
-        , a [ class "lnk", Route.href Route.BlackSheep ] [ text "Black Sheep" ]
+    div [ class "flex flex-col p-8 space-y-4" ]
+        [ a [ class "lnk text-lg", Route.href Route.BlackSheep ] [ text "Black Sheep" ]
+        , a [ class "lnk text-lg", Route.href Route.LockPuzzle ] [ text "Lock Puzzle" ]
+        , a [ class "lnk text-lg", Route.href Route.MothersDay ] [ text "Mothers Day" ]
+        , a [ class "lnk text-lg", Route.href Route.Recaman ] [ text "Recaman" ]
+        , a [ class "lnk text-lg", Route.href Route.Squares ] [ text "Squares" ]
+
+        -- a [ class "lnk", Route.href Route.Dots ] [ text "Dots" ]
         ]
 
 
