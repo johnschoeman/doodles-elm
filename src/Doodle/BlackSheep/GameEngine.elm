@@ -1,4 +1,10 @@
-module Doodle.BlackSheep.GameEngine exposing (State(..), anyValidMovesForNode, gameState, moveIsValid, showState, update)
+module Doodle.BlackSheep.GameEngine exposing
+    ( State(..)
+    , anyValidMovesForNode
+    , gameState
+    , moveIsValid
+    , update
+    )
 
 import Doodle.BlackSheep.Board as Board exposing (Board, Node(..), Status(..))
 
@@ -7,19 +13,6 @@ type State
     = Won
     | Lost
     | InProgress
-
-
-showState : State -> String
-showState status =
-    case status of
-        Won ->
-            "COMPLETED!"
-
-        Lost ->
-            "FAILED!"
-
-        InProgress ->
-            ""
 
 
 update : Node -> Node -> Board -> Board

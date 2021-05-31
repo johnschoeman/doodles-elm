@@ -83,18 +83,7 @@ initialLevels =
 
 view : Model -> Html Msg
 view model =
-    let
-        body =
-            div [] [ Html.map (\gameMsg -> GotGameMsg gameMsg) (Game.view model.game) ]
-    in
-    case model.viewport of
-        Just viewport ->
-            div [ class "" ]
-                [ div [ class "px-8 max-w-sm m-auto" ] [ body ]
-                ]
-
-        Nothing ->
-            div [] [ text "loading..." ]
+    Html.map (\gameMsg -> GotGameMsg gameMsg) (Game.view model.game)
 
 
 goToGameCallback : Level -> Html.Attribute Msg

@@ -136,66 +136,71 @@ resetGame model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "m-auto max-w-sm" ]
-        [ gameHeader model
-        , boardToSvg model.board model.selection
+    div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
+        [ div [ class "flex-1" ] [ boardToSvg model.board model.selection ]
+        , div [ class "flex-1" ] [ gameControls model ]
         ]
 
 
-gameHeader : Model -> Html Msg
-gameHeader model =
-    let
-        maybeLevelData =
-            Level.getLevel model.levelId model.levels
-
-        gameWonIcon =
-            case maybeLevelData of
-                Just levelData ->
-                    case levelData.completed of
-                        True ->
-                            starIcon
-
-                        False ->
-                            text ""
-
-                Nothing ->
-                    text ""
-    in
-    div [ class "flex-column" ]
-        [ div [ class "w-full max-w-sm" ] [ gameButtons model ]
-        , div [ class "w-full h-8 p-4 flex flex-row justify-between" ]
-            [ div [] [ gameStateText model.board ]
-            , div [] [ gameWonIcon ]
-            ]
+gameControls : Model -> Html Msg
+gameControls model =
+    div []
+        [ div [ class "mb-8 border-b border-gray-400" ] [ gameButtons model ]
+        , div [ class "flex justify-center items-center" ] [ gameStateIcon model.board ]
         ]
+
+
+gameStateIcon : Board -> Html Msg
+gameStateIcon board =
+    case GameEngine.gameState board of
+        GameEngine.Won ->
+            div [ class "text-green-600" ] [ winIcon ]
+
+        GameEngine.Lost ->
+            div [ class "text-red-600" ] [ failIcon ]
+
+        GameEngine.InProgress ->
+            inProgressIcon
 
 
 gameButtons : Model -> Html Msg
 gameButtons model =
     let
         buttonStyle =
-            "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded"
 
         currentLevelText =
-            "Level " ++ String.fromInt model.levelId
+            String.fromInt model.levelId
     in
-    div [ class "mt-4 flex flex-row justify-center items-center h-36" ]
-        [ div [ class "flex-1 w-full justify-center" ]
-            [ button [ onClick DecrementLevel, class buttonStyle ] [ leftIcon ]
+    div [ class "mt-4 flex flex-row justify-between lg:justify-around mb-8" ]
+        [ div [ class "flex flex-row w-1/2" ]
+            [ div [ class "flex-1" ]
+                [ button [ onClick DecrementLevel, class buttonStyle ] [ leftIcon ]
+                ]
+            , div [ class "flex-1 text-2xl font-bold" ] [ text currentLevelText ]
+            , div [ class "flex-1" ]
+                [ button [ onClick IncrementLevel, class buttonStyle ] [ rightIcon ]
+                ]
             ]
-        , div [ class "flex-1 w-full text-start" ] [ text currentLevelText ]
-        , div [ class "flex-1 w-full justify-center" ]
-            [ button [ onClick IncrementLevel, class buttonStyle ] [ rightIcon ]
-            ]
-        , div [ class "flex-1 w-full justify-center items-center" ]
+        , div [ class "" ]
             [ button [ onClick ResetGame, class (buttonStyle ++ " ml-8") ] [ resetIcon ]
             ]
         ]
 
 
-starIcon : Html Msg
-starIcon =
-    FeatherIcons.star |> FeatherIcons.toHtml []
+winIcon : Html Msg
+winIcon =
+    FeatherIcons.checkCircle |> FeatherIcons.withSize 64 |> FeatherIcons.toHtml []
+
+
+failIcon : Html Msg
+failIcon =
+    FeatherIcons.xCircle |> FeatherIcons.withSize 64 |> FeatherIcons.toHtml []
+
+
+inProgressIcon : Html Msg
+inProgressIcon =
+    FeatherIcons.circle |> FeatherIcons.withSize 64 |> FeatherIcons.toHtml []
 
 
 leftIcon : Html Msg
@@ -211,15 +216,6 @@ rightIcon =
 resetIcon : Html Msg
 resetIcon =
     FeatherIcons.refreshCw |> FeatherIcons.toHtml []
-
-
-gameStateText : Board -> Html msg
-gameStateText board =
-    let
-        gameState =
-            GameEngine.gameState board
-    in
-    text (GameEngine.showState gameState)
 
 
 boardToSvg : Board -> Node -> Html Msg

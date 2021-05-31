@@ -161,15 +161,10 @@ solved board =
 
 view : Model -> Html Msg
 view model =
-    case model.viewport of
-        Just viewport ->
-            div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
-                [ div [ class "flex-1 flex justify-center" ] [ gameBoard model ]
-                , div [ class "flex-1" ] [ gameControls model ]
-                ]
-
-        Nothing ->
-            div [] [ text "loading..." ]
+    div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
+        [ div [ class "flex-1 flex justify-center" ] [ gameBoard model ]
+        , div [ class "flex-1" ] [ gameControls model ]
+        ]
 
 
 
