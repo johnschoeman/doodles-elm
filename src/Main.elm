@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Navigation as Nav
-import Doodle.BlackSheep as BlackSheep
+import Doodle.BlackSheep.Main as BlackSheep
 import Doodle.Dots as Dots
 import Doodle.LockPuzzle as LockPuzzle
 import Doodle.MothersDay as MothersDay
