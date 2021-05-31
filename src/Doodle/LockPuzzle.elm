@@ -5,6 +5,7 @@ import FeatherIcons
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes as Attr exposing (class, classList, style, type_, value)
 import Html.Events exposing (onClick, onInput)
+import InputHelpers
 import List.Extra exposing (updateAt)
 import Random
 import Session exposing (WithSession)
@@ -217,12 +218,7 @@ gameControls model =
             ]
         , div [ class "flex flex-row justify-around items-center" ]
             [ div [ class "" ]
-                [ button
-                    [ onClick GetRandomBoard
-                    , class "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    ]
-                    [ resetIcon ]
-                ]
+                [ InputHelpers.resetButton GetRandomBoard ]
             , div [ class "w-1/2" ]
                 [ label [ class "block text-sm font-medium text-gray-700" ] [ text "Size" ]
                 , div [ class "mt-1 relative rounded-md shadow-sm" ] [ numberInput 2 12 model.boardSize UpdateBoardSize ]
@@ -266,8 +262,3 @@ solvedStatus board =
             [ FeatherIcons.lock
                 |> FeatherIcons.toHtml []
             ]
-
-
-resetIcon : Html Msg
-resetIcon =
-    FeatherIcons.refreshCw |> FeatherIcons.toHtml []

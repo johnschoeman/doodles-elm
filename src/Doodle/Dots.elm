@@ -302,7 +302,7 @@ init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
       , viewport = Nothing
-      , colNumber = 50
+      , colNumber = 5
       , baseColor = { red = 12, green = 12, blue = 12 }
       , rgbFunc = { redFunc = SinColor, greenFunc = ModColor, blueFunc = ModColor }
       , rgbDist = { red = Radial, green = Radial, blue = Radial }
@@ -473,121 +473,42 @@ view model =
     in
     case model.viewport of
         Just viewport ->
-            div [ class "p-32" ]
-                [ div [ class "flex flex-row w-full justify-between" ]
-                    [ dotButtons
-                    , rgbColorFunctionSelector model.rgbFunc
-                    , rgbDistFunctionSelector model.rgbDist
-                    ]
-                , div [] [ text <| showDotColor model.baseColor ]
-                , div [] [ text <| showCoordinate model.origin ]
-                , art viewport model
+            div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
+                [ div [ class "flex-1 justify-center items-center" ] [ art viewport model ]
+                , div [ class "flex-1" ] [ gameControls model ]
                 ]
 
         Nothing ->
             div [] [ text "loading..." ]
 
 
-dotButtons : Html Msg
-dotButtons =
-    div [ class "flex flex-row w-full" ]
-        [ squareButton IncrementColNumber "+"
-        , squareButton DecrementColNumber "-"
-        , squareButton GetRandomColor "?"
-        ]
 
-
-rgbColorFunctionSelector : RGBFunc -> Html Msg
-rgbColorFunctionSelector rgbFunc =
-    div [ class "flex flex-row w-full" ]
-        [ colorFunctionSelector rgbFunc.redFunc SetRedColorFunction
-        , colorFunctionSelector rgbFunc.greenFunc SetGreenColorFunction
-        , colorFunctionSelector rgbFunc.blueFunc SetBlueColorFunction
-        ]
-
-
-colorFunctionSelector : ColorFunc -> (String -> Msg) -> Html Msg
-colorFunctionSelector currentColorFunc toMsg =
-    let
-        f =
-            showColorFunc
-    in
-    InputHelpers.dropDown toMsg
-        currentColorFunc
-        [ InputHelpers.Option (f ModColor) (f ModColor) ModColor
-        , InputHelpers.Option (f SinColor) (f SinColor) SinColor
-        , InputHelpers.Option (f CosColor) (f CosColor) CosColor
-        , InputHelpers.Option (f TanColor) (f TanColor) TanColor
-        , InputHelpers.Option (f SawColor) (f SawColor) SawColor
-        , InputHelpers.Option (f SquareColor) (f SquareColor) SquareColor
-        , InputHelpers.Option (f ClampColor) (f ClampColor) ClampColor
-        ]
-
-
-functionSelectOption : (ColorFunc -> String) -> ColorFunc -> ColorFunc -> Html Msg
-functionSelectOption toString colorFunc s =
-    option [ value <| toString colorFunc, selected (colorFunc == s) ] [ text <| toString colorFunc ]
-
-
-rgbDistFunctionSelector : RGBDist -> Html Msg
-rgbDistFunctionSelector rgbDist =
-    div [ class "flex flex-row w-full" ]
-        [ distFunctionSelector rgbDist.red SetRedDistFunction
-        , distFunctionSelector rgbDist.green SetGreenDistFunction
-        , distFunctionSelector rgbDist.blue SetBlueDistFunction
-        ]
-
-
-distFunctionSelector : DistFunc -> (String -> Msg) -> Html Msg
-distFunctionSelector currentDistFunc toMsg =
-    let
-        f =
-            showDistFunc
-    in
-    InputHelpers.dropDown toMsg
-        currentDistFunc
-        [ InputHelpers.Option (f Radial) (f Radial) Radial
-        , InputHelpers.Option (f Taxi) (f Taxi) Taxi
-        , InputHelpers.Option (f Mult) (f Mult) Mult
-        , InputHelpers.Option (f RowOnly) (f RowOnly) RowOnly
-        , InputHelpers.Option (f ColOnly) (f ColOnly) ColOnly
-        ]
+---- Art ----
 
 
 art : Viewport -> Model -> Html Msg
 art viewport { colNumber, baseColor, origin, rgbFunc, rgbDist } =
-    let
-        { width, height } =
-            viewport.viewport
-
-        m =
-            min width height
-
-        w =
-            ceiling <| (m + 100) / toFloat (colNumber * 2)
-    in
-    div
-        [ class "grid dot-box m-auto border-2" ]
-        (listOfDots baseColor rgbFunc rgbDist w colNumber origin)
+    div [ class "full-square lg:half-square flex flex-col" ]
+        (listOfDots baseColor rgbFunc rgbDist colNumber origin)
 
 
-listOfDots : DotColor -> RGBFunc -> RGBDist -> Int -> Int -> Coordinate -> List (Html Msg)
-listOfDots baseColor rgbFunc rgbDist w count origin =
+listOfDots : DotColor -> RGBFunc -> RGBDist -> Int -> Coordinate -> List (Html Msg)
+listOfDots baseColor rgbFunc rgbDist count origin =
     let
         baseMatrix =
             List.repeat count (List.repeat count 0)
     in
-    List.indexedMap (\rowIdx row -> rowToDots baseColor rgbFunc rgbDist w rowIdx row origin) baseMatrix
+    List.indexedMap (\rowIdx row -> rowToDots baseColor rgbFunc rgbDist rowIdx row origin) baseMatrix
 
 
-rowToDots : DotColor -> RGBFunc -> RGBDist -> Int -> Int -> List a -> Coordinate -> Html Msg
-rowToDots baseColor rgbFunc rgbDist w rowIdx row origin =
+rowToDots : DotColor -> RGBFunc -> RGBDist -> Int -> List a -> Coordinate -> Html Msg
+rowToDots baseColor rgbFunc rgbDist rowIdx row origin =
     div [ class "flex flex-row" ]
-        (List.indexedMap (\colIdx _ -> dot baseColor rgbFunc rgbDist w rowIdx colIdx origin) row)
+        (List.indexedMap (\colIdx _ -> dot baseColor rgbFunc rgbDist rowIdx colIdx origin) row)
 
 
-dot : DotColor -> RGBFunc -> RGBDist -> Int -> Int -> Int -> Coordinate -> Html Msg
-dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist w rowIdx colIdx origin =
+dot : DotColor -> RGBFunc -> RGBDist -> Int -> Int -> Coordinate -> Html Msg
+dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist rowIdx colIdx origin =
     let
         distanceToRow =
             rowIdx - Tuple.first origin
@@ -621,7 +542,7 @@ dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist w rowIdx colId
                 |> Color.toRGBString
 
         wString =
-            String.fromInt w
+            "15"
     in
     div [ class "w-full h-full flex justify-center items-center" ]
         [ svg [ Svg.Events.onClick <| ClickDot dotColor ( rowIdx, colIdx ), width wString, height wString, viewBox ("0 0 " ++ wString ++ " " ++ wString) ]
@@ -634,4 +555,80 @@ dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist w rowIdx colId
                 ]
                 []
             ]
+        ]
+
+
+
+---- Controls ----
+
+
+gameControls : Model -> Html Msg
+gameControls model =
+    div [ class "p-4" ]
+        [ div [ class "flex flex-col w-full justify-between" ]
+            [ dotButtons
+            , rgbColorFunctionSelector model.rgbFunc model.rgbDist
+            ]
+        ]
+
+
+dotButtons : Html Msg
+dotButtons =
+    div [ class "flex flex-row w-full py-4 justify-around items-center mb-4" ]
+        [ InputHelpers.addButton IncrementColNumber
+        , InputHelpers.subtractButton DecrementColNumber
+        , InputHelpers.resetButton GetRandomColor
+        ]
+
+
+rgbColorFunctionSelector : RGBFunc -> RGBDist -> Html Msg
+rgbColorFunctionSelector rgbFunc rgbDist =
+    div [ class "flex flex-col w-full lg:w-1/2 space-y-4" ]
+        [ colorFunctionSelector rgbFunc.redFunc "Red Color" SetRedColorFunction
+        , distFunctionSelector rgbDist.red "Red Distance" SetRedDistFunction
+        , colorFunctionSelector rgbFunc.greenFunc "Green Color" SetGreenColorFunction
+        , distFunctionSelector rgbDist.green "Green Distance" SetGreenDistFunction
+        , colorFunctionSelector rgbFunc.blueFunc "Blue Color" SetBlueColorFunction
+        , distFunctionSelector rgbDist.blue "Blue Distance" SetBlueDistFunction
+        ]
+
+
+colorFunctionSelector : ColorFunc -> String -> (String -> Msg) -> Html Msg
+colorFunctionSelector currentColorFunc labelText toMsg =
+    let
+        f =
+            showColorFunc
+    in
+    InputHelpers.dropDown toMsg
+        currentColorFunc
+        labelText
+        [ InputHelpers.Option (f ModColor) (f ModColor) ModColor
+        , InputHelpers.Option (f SinColor) (f SinColor) SinColor
+        , InputHelpers.Option (f CosColor) (f CosColor) CosColor
+        , InputHelpers.Option (f TanColor) (f TanColor) TanColor
+        , InputHelpers.Option (f SawColor) (f SawColor) SawColor
+        , InputHelpers.Option (f SquareColor) (f SquareColor) SquareColor
+        , InputHelpers.Option (f ClampColor) (f ClampColor) ClampColor
+        ]
+
+
+functionSelectOption : (ColorFunc -> String) -> ColorFunc -> ColorFunc -> Html Msg
+functionSelectOption toString colorFunc s =
+    option [ value <| toString colorFunc, selected (colorFunc == s) ] [ text <| toString colorFunc ]
+
+
+distFunctionSelector : DistFunc -> String -> (String -> Msg) -> Html Msg
+distFunctionSelector currentDistFunc labelText toMsg =
+    let
+        f =
+            showDistFunc
+    in
+    InputHelpers.dropDown toMsg
+        currentDistFunc
+        labelText
+        [ InputHelpers.Option (f Radial) (f Radial) Radial
+        , InputHelpers.Option (f Taxi) (f Taxi) Taxi
+        , InputHelpers.Option (f Mult) (f Mult) Mult
+        , InputHelpers.Option (f RowOnly) (f RowOnly) RowOnly
+        , InputHelpers.Option (f ColOnly) (f ColOnly) ColOnly
         ]

@@ -1,7 +1,8 @@
 module InputHelpers exposing (..)
 
-import Html exposing (Html, button, div, img, option, select, text)
-import Html.Attributes exposing (class, selected, src, value)
+import FeatherIcons
+import Html exposing (Html, button, div, img, label, option, select, text)
+import Html.Attributes exposing (class, for, id, selected, src, value)
 import Html.Events exposing (onClick, onInput)
 import Svg exposing (use)
 import Svg.Attributes exposing (x, y)
@@ -20,27 +21,65 @@ type Option a
     = Option String String a
 
 
-dropDown : (String -> msg) -> a -> List (Option a) -> Html msg
-dropDown toMsg s options =
-    let
-        containerStyle =
-            "w-full md:w-1/3 px-3 mb-6 md:mb-0"
-
-        selectStyle =
-            "block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-    in
-    div [ class containerStyle ]
-        [ div [ class "relative" ]
-            [ select [ class selectStyle, onInput toMsg ]
-                (List.map (dropDownOption s) options)
+dropDown : (String -> msg) -> a -> String -> List (Option a) -> Html msg
+dropDown toMsg selectedItem labelText options =
+    div []
+        [ label [ for labelText, class "block text-sm font-medium text-gray-700" ] [ text labelText ]
+        , select
+            [ onInput toMsg
+            , id labelText
+            , class "mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
             ]
+            (List.map (dropDownOption selectedItem) options)
         ]
 
 
 dropDownOption : a -> Option a -> Html msg
 dropDownOption s (Option v t item) =
-    let
-        style =
-            "border-2"
-    in
-    option [ class style, value v, selected (item == s) ] [ text t ]
+    option [ value v, selected (item == s) ] [ text t ]
+
+
+
+---- Buttons ----
+
+
+addButton : msg -> Html msg
+addButton onClickMsg =
+    button
+        [ onClick onClickMsg
+        , class "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        ]
+        [ addIcon ]
+
+
+subtractButton : msg -> Html msg
+subtractButton onClickMsg =
+    button
+        [ onClick onClickMsg
+        , class "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        ]
+        [ subtractIcon ]
+
+
+resetButton : msg -> Html msg
+resetButton onClickMsg =
+    button
+        [ onClick onClickMsg
+        , class "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        ]
+        [ resetIcon ]
+
+
+resetIcon : Html msg
+resetIcon =
+    FeatherIcons.refreshCw |> FeatherIcons.toHtml []
+
+
+addIcon : Html msg
+addIcon =
+    FeatherIcons.plus |> FeatherIcons.toHtml []
+
+
+subtractIcon : Html msg
+subtractIcon =
+    FeatherIcons.minus |> FeatherIcons.toHtml []

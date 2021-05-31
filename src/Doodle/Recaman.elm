@@ -310,6 +310,7 @@ drawSettingDropdown : SweepPattern -> (String -> Msg) -> Html Msg
 drawSettingDropdown currentPattern toMsg =
     InputHelpers.dropDown toMsg
         currentPattern
+        "Pattern"
         [ InputHelpers.Option (showPattern A) (showPattern A) A
         , InputHelpers.Option (showPattern B) (showPattern B) B
         , InputHelpers.Option (showPattern C) (showPattern C) C
