@@ -17,7 +17,7 @@
     @apply outline-none;
   }
 
-  @variants responsive {
+  @layer responsive {
     .dot-box {
       height: 65vmin;
       width: 65vmin;
