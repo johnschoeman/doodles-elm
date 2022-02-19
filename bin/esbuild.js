@@ -1,4 +1,3 @@
-const path = require('path')
 const ElmPlugin = require('esbuild-plugin-elm')
 const esbuild = require('esbuild')
 
@@ -12,4 +11,4 @@ esbuild.build({
   plugins: [
     ElmPlugin()
   ],
-}).catch(e => (console.error(e), process.exit(1)))
+}).catch(() => process.exit(1))

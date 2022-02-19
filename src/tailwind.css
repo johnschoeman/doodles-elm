@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer utilities {
   .lnk {
     @apply inline-block text-gray-800 underline;
