@@ -1,7 +1,6 @@
 module Doodle.Dots exposing (Model, Msg, init, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
-import Color
 import Html exposing (Html, button, div, option, p, select, text)
 import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onClick, onInput)
@@ -538,9 +537,10 @@ dot { red, green, blue } { redFunc, greenFunc, blueFunc } rgbDist rowIdx colIdx 
             DotColor red green blue
 
         fillColor =
-            Color.fromRGB ( nextRed, nextGreen, nextBlue )
-                |> Color.toRGBString
+            "rbga(0,0,0,1.0)"
 
+        -- Color.fromRGB ( nextRed, nextGreen, nextBlue )
+        -- |> Color.toRGBString
         wString =
             "15"
     in

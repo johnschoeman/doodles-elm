@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 @layer utilities {
+  /* Links */
+
   .lnk {
     @apply inline-block text-gray-800 underline;
   }
@@ -14,6 +16,12 @@
   }
   .lnk:focus {
     @apply outline-none;
+  }
+
+  /* Typography */
+
+  .h1 {
+    @apply text-lg font-bold;
   }
 
   @layer responsive {

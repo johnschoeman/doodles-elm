@@ -6,6 +6,7 @@ import Browser.Navigation as Nav
 import Doodle.BlackSheep.Main as BlackSheep
 import Doodle.Dots as Dots
 import Doodle.LockPuzzle as LockPuzzle
+import Doodle.ModularTimesTable.Main as ModularTimesTable
 import Doodle.MothersDay as MothersDay
 import Doodle.Recaman as Recaman
 import Doodle.Squares as Squares
@@ -47,6 +48,7 @@ type Model
     | MothersDay MothersDay.Model
     | LockPuzzle LockPuzzle.Model
     | BlackSheep BlackSheep.Model
+    | ModularTimesTable ModularTimesTable.Model
 
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -73,6 +75,7 @@ type Msg
     | HandleRecamanMsg Recaman.Msg
     | HandleLockPuzzleMsg LockPuzzle.Msg
     | HandleBlackSheepMsg BlackSheep.Msg
+    | HandleModularTimesTableMsg ModularTimesTable.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -152,6 +155,15 @@ update msg model =
             , Cmd.map HandleBlackSheepMsg newMsg
             )
 
+        ( HandleModularTimesTableMsg subMsg, ModularTimesTable model_ ) ->
+            let
+                ( newModel, newMsg ) =
+                    ModularTimesTable.update subMsg model_
+            in
+            ( ModularTimesTable newModel
+            , Cmd.map HandleModularTimesTableMsg newMsg
+            )
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
@@ -193,6 +205,10 @@ changeRouteTo maybeRoute model =
             BlackSheep.init session
                 |> updateWith BlackSheep HandleBlackSheepMsg
 
+        Just Route.ModularTimesTable ->
+            ModularTimesTable.init session
+                |> updateWith ModularTimesTable HandleModularTimesTableMsg
+
 
 toSession : Model -> Session.Model
 toSession model =
@@ -222,6 +238,9 @@ toSession model =
             session
 
         BlackSheep { session } ->
+            session
+
+        ModularTimesTable { session } ->
             session
 
 
@@ -258,7 +277,7 @@ view model =
     { title = "Doodles"
     , body =
         [ header
-        , pageContent model
+        , div [ class "p-4" ] [ pageContent model ]
         , pageFooter
         ]
     }
@@ -266,9 +285,9 @@ view model =
 
 header : Html Msg
 header =
-    Html.header [ class "border-b border-gray-400 py-4" ]
+    Html.header [ class "border-b border-gray-200 py-2" ]
         [ h1 [ class "ml-4 text-2xl" ]
-            [ a [ Route.href Route.Home, class "lnk" ] [ text "doodles.camp" ]
+            [ a [ Route.href Route.Home, class "h1" ] [ text "doodles.camp" ]
             ]
         ]
 
@@ -296,6 +315,9 @@ pageContent model =
 
         BlackSheep m ->
             Html.map HandleBlackSheepMsg <| BlackSheep.view m
+
+        ModularTimesTable m ->
+            Html.map HandleModularTimesTableMsg <| ModularTimesTable.view m
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]

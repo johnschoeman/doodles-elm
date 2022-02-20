@@ -161,7 +161,7 @@ solved board =
 
 view : Model -> Html Msg
 view model =
-    div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
+    div [ class "w-full p-8 flex flex-col lg:flex-row h-[80vh]" ]
         [ div [ class "flex-1 flex justify-center" ] [ gameBoard model ]
         , div [ class "flex-1" ] [ gameControls model ]
         ]

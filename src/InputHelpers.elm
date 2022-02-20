@@ -1,8 +1,19 @@
 module InputHelpers exposing (..)
 
 import FeatherIcons
-import Html exposing (Html, button, div, img, label, option, select, text)
-import Html.Attributes exposing (class, for, id, selected, src, value)
+import Html exposing (Html, button, div, img, input, label, option, select, span, text)
+import Html.Attributes
+    exposing
+        ( class
+        , for
+        , id
+        , name
+        , placeholder
+        , selected
+        , src
+        , type_
+        , value
+        )
 import Html.Events exposing (onClick, onInput)
 import Svg exposing (use)
 import Svg.Attributes exposing (x, y)
@@ -37,6 +48,33 @@ dropDown toMsg selectedItem labelText options =
 dropDownOption : a -> Option a -> Html msg
 dropDownOption s (Option v t item) =
     option [ value v, selected (item == s) ] [ text t ]
+
+
+numberInput : String -> String -> String -> String -> (String -> msg) -> Html msg
+numberInput labelText optionText p v toMsg =
+    viewInput labelText optionText "number" p v toMsg
+
+
+viewInput : String -> String -> String -> String -> String -> (String -> msg) -> Html msg
+viewInput labelText optionText t p v toMsg =
+    div [ class "w-64" ]
+        [ div [ class "flex justify-between" ]
+            [ label [ for labelText, class "block text-sm font-medium text-gray-700" ] [ text labelText ]
+            , span [ class "text-sm text-gray-500" ] [ text optionText ]
+            ]
+        , div [ class "mt-1" ]
+            [ input
+                [ class "p-2 shadow-sm border focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                , name labelText
+                , id labelText
+                , type_ t
+                , placeholder p
+                , value v
+                , onInput toMsg
+                ]
+                []
+            ]
+        ]
 
 
 
