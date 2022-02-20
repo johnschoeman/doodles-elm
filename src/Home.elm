@@ -22,12 +22,12 @@ init session =
 view : Model -> Html msg
 view model =
     div [ class "flex flex-col p-8 space-y-4 text-gray-900" ]
-        [ a [ class "lnk text-lg", Route.href Route.ModularTimesTable ] [ text "Modular Times Table" ]
-        , a [ class "lnk text-lg", Route.href Route.BlackSheep ] [ text "Black Sheep" ]
-        , a [ class "lnk text-lg", Route.href Route.LockPuzzle ] [ text "Lock Puzzle" ]
-        , a [ class "lnk text-lg", Route.href Route.Recaman ] [ text "Recaman" ]
-        , a [ class "lnk text-lg", Route.href Route.Squares ] [ text "Squares" ]
-        , a [ class "lnk text-lg", Route.href Route.Dots ] [ text "Dots" ]
+        [ a [ class "lnk text-lg", Route.href Route.ModularTimesTable ] [ text "modular times table" ]
+        , a [ class "lnk text-lg", Route.href Route.BlackSheep ] [ text "black sheep" ]
+        , a [ class "lnk text-lg", Route.href Route.LockPuzzle ] [ text "lock puzzle" ]
+        , a [ class "lnk text-lg", Route.href Route.Recaman ] [ text "recaman" ]
+        , a [ class "lnk text-lg", Route.href Route.Squares ] [ text "squares" ]
+        , a [ class "lnk text-lg", Route.href Route.Dots ] [ text "dots" ]
         ]
 
 

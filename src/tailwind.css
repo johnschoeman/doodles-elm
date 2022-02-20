@@ -24,20 +24,18 @@
     @apply text-lg font-bold;
   }
 
-  @layer responsive {
-    .dot-box {
-      height: 65vmin;
-      width: 65vmin;
-    }
+  .dot-box {
+    height: 65vmin;
+    width: 65vmin;
+  }
 
-    .half-square {
-      height: 50vw;
-      width: 50vw;
-    }
+  .half-square {
+    height: 50vw;
+    width: 50vw;
+  }
 
-    .full-square {
-      height: 90vw;
-      width: 90vw;
-    }
+  .full-square {
+    height: 90vw;
+    width: 90vw;
   }
 }
