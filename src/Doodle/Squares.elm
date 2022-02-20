@@ -2,7 +2,7 @@ module Doodle.Squares exposing (Model, Msg, init, subscriptions, update, view)
 
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events exposing (onAnimationFrame)
-import Color
+import Color.Convert
 import Html exposing (Html, div, text)
 import Html.Attributes as Attr exposing (class, style, type_, value)
 import Session exposing (WithSession)
@@ -203,8 +203,12 @@ art viewport model =
 
 colorToRGB : Color -> String
 colorToRGB color =
-    Color.fromRGB ( color.red, color.green, color.blue )
-        |> Color.toRGBString
+    "rgba(0,0,0,1.0)"
+
+
+
+-- Color.Convert. ( color.red, color.green, color.blue )
+-- |> Color.toRGBString
 
 
 squareSvg : Square -> Html msg

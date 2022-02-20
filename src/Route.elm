@@ -20,6 +20,7 @@ type Route
     | MothersDay
     | LockPuzzle
     | BlackSheep
+    | ModularTimesTable
 
 
 parser : Parser (Route -> a) a
@@ -30,8 +31,9 @@ parser =
         , Parser.map Squares (s "doodles" </> s "squares")
         , Parser.map Recaman (s "doodles" </> s "recaman")
         , Parser.map MothersDay (s "doodles" </> s "mom")
-        , Parser.map LockPuzzle (s "doodles" </> s "lock_puzzle")
-        , Parser.map BlackSheep (s "doodles" </> s "black_sheep")
+        , Parser.map LockPuzzle (s "doodles" </> s "lock-puzzle")
+        , Parser.map BlackSheep (s "doodles" </> s "black-sheep")
+        , Parser.map ModularTimesTable (s "doodles" </> s "modular-times-table")
         ]
 
 
@@ -72,9 +74,12 @@ routeToString page =
                     [ "doodles", "mom" ]
 
                 LockPuzzle ->
-                    [ "doodles", "lock_puzzle" ]
+                    [ "doodles", "lock-puzzle" ]
 
                 BlackSheep ->
-                    [ "doodles", "black_sheep" ]
+                    [ "doodles", "black-sheep" ]
+
+                ModularTimesTable ->
+                    [ "doodles", "modular-times-table" ]
     in
     "#/" ++ String.join "/" pieces
