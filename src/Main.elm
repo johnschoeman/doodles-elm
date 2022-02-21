@@ -12,9 +12,11 @@ import Doodle.Recaman as Recaman
 import Doodle.Squares as Squares
 import Home
 import Html exposing (Html, a, div, footer, h1, h2, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, href)
 import Route
 import Session
+import Svg exposing (Svg, svg)
+import Svg.Attributes
 import Url
 
 
@@ -285,10 +287,11 @@ view model =
 
 header : Html Msg
 header =
-    Html.header [ class "border-b border-gray-200 py-2" ]
-        [ h1 [ class "ml-4 text-2xl" ]
+    Html.header [ class "flex flex-row justify-between items-center border-b border-gray-200 py-2 px-4" ]
+        [ h1 [ class "text-2xl" ]
             [ a [ Route.href Route.Home, class "h1" ] [ text "doodles.camp" ]
             ]
+        , githubLink
         ]
 
 
@@ -350,4 +353,33 @@ pageFooter : Html a
 pageFooter =
     footer []
         [ div [] [ text "" ]
+        ]
+
+
+githubLink : Html Msg
+githubLink =
+    a [ class "text-gray-800 rounded-full p-2", href "https://github.com/johnschoeman/doodles" ]
+        [ github
+        ]
+
+
+svgFeatherIcon : String -> List (Svg msg) -> Html msg
+svgFeatherIcon className =
+    svg
+        [ Svg.Attributes.class <| "feather feather-" ++ className
+        , Svg.Attributes.fill "none"
+        , Svg.Attributes.height "24"
+        , Svg.Attributes.stroke "currentColor"
+        , Svg.Attributes.strokeLinecap "round"
+        , Svg.Attributes.strokeLinejoin "round"
+        , Svg.Attributes.strokeWidth "2"
+        , Svg.Attributes.viewBox "0 0 24 24"
+        , Svg.Attributes.width "24"
+        ]
+
+
+github : Html msg
+github =
+    svgFeatherIcon "github"
+        [ Svg.path [ Svg.Attributes.d "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" ] []
         ]

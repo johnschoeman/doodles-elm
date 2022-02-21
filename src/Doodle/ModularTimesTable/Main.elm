@@ -257,15 +257,7 @@ radianAndLengthToCartesian length radian =
 
 footer : Html Msg
 footer =
-    div [ class "flex flex-col pt-8 lg:flex-row lg:space-x-2 lg:pt-0" ]
-        [ div []
-            [ text "inspired by: "
-            , a [ class "lnk", href "https://youtu.be/6ZrO90AI0c8" ] [ text "vortex math" ]
-            ]
-        , div [ class "hidden lg:block" ] [ text "|" ]
-        , div []
-            [ text "github: "
-            , a [ class "lnk", href "https://github.com/johnschoeman/doodles" ]
-                [ text "/doodles" ]
-            ]
+    div []
+        [ text "inspired by: "
+        , a [ class "lnk", href "https://youtu.be/6ZrO90AI0c8" ] [ text "vortex math" ]
         ]
