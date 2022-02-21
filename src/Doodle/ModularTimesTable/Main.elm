@@ -25,16 +25,16 @@ maxModulus =
 
 type alias Model =
     WithSession
-        { multiplier : Int
-        , modulus : Int
+        { multiplier : Maybe Int
+        , modulus : Maybe Int
         }
 
 
 init : Session.Model -> ( Model, Cmd Msg )
 init session =
     ( { session = session
-      , multiplier = 185
-      , modulus = 1656
+      , multiplier = Just 185
+      , modulus = Just 1656
       }
     , Cmd.none
     )
@@ -53,30 +53,31 @@ update msg model =
             let
                 maybeNextModulus =
                     String.toInt modulus
-            in
-            case maybeNextModulus of
-                Just nextModulus ->
-                    ( { model
-                        | modulus = min nextModulus maxModulus
-                        , multiplier = min model.multiplier (nextModulus - 1)
-                      }
-                    , Cmd.none
-                    )
 
-                Nothing ->
-                    ( model, Cmd.none )
+                nextModulus =
+                    Maybe.map (\mod -> min mod maxModulus) maybeNextModulus
+
+                nextMultiplier =
+                    Maybe.map2 (\mult nextMod -> min mult (nextMod - 1)) model.multiplier nextModulus
+            in
+            ( { model
+                | modulus = nextModulus
+                , multiplier = nextMultiplier
+              }
+            , Cmd.none
+            )
 
         UpdateMultiplier multiplier ->
             let
                 maybeNextMultiplier =
                     String.toInt multiplier
-            in
-            case maybeNextMultiplier of
-                Just nextMultiplier ->
-                    ( { model | multiplier = min nextMultiplier (model.modulus - 1) }, Cmd.none )
 
-                Nothing ->
-                    ( model, Cmd.none )
+                nextMultiplier =
+                    Maybe.map2 (\mult mod -> min mult (mod - 1)) maybeNextMultiplier model.modulus
+            in
+            ( { model | multiplier = nextMultiplier }
+            , Cmd.none
+            )
 
         NoOp ->
             ( model, Cmd.none )
@@ -88,7 +89,7 @@ view model =
         [ header
         , div [ class "flex flex-col space-y-8 lg:space-y-0 lg:flex-row lg:space-x-8 lg:h-[80vh]" ]
             [ inputs model
-            , timesTable model
+            , timesTable (Maybe.withDefault 1 model.modulus) (Maybe.withDefault 1 model.multiplier)
             ]
         , footer
         ]
@@ -103,10 +104,10 @@ inputs : Model -> Html Msg
 inputs { modulus, multiplier } =
     let
         modulusText =
-            String.fromInt modulus
+            Maybe.withDefault "" <| Maybe.map String.fromInt modulus
 
         multiplierText =
-            String.fromInt multiplier
+            Maybe.withDefault "" <| Maybe.map String.fromInt multiplier
 
         modulusOptionText =
             String.join " " [ "max:", String.fromInt maxModulus ]
@@ -129,20 +130,20 @@ buildRemainersList multiplier modulus modulusIntList =
         |> List.map (remainderBy modulus)
 
 
-timesTable : Model -> Html Msg
-timesTable model =
+timesTable : Int -> Int -> Html Msg
+timesTable modulus multiplier =
     let
         modulusIntList =
-            buildModulusIntList model.modulus
+            buildModulusIntList modulus
 
         remaindersList =
-            buildRemainersList model.multiplier model.modulus modulusIntList
+            buildRemainersList multiplier modulus modulusIntList
 
         zippedList =
             List.map2 (\m r -> ( m, r )) modulusIntList remaindersList
     in
     div [ class "w-full" ]
-        [ numberDiagram model.modulus zippedList
+        [ numberDiagram modulus zippedList
         ]
 
 
