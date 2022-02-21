@@ -276,7 +276,7 @@ subscriptions model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Doodles"
+    { title = "doodles.camp"
     , body =
         [ header
         , pageContent model
