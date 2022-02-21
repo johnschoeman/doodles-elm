@@ -277,7 +277,7 @@ view model =
     { title = "Doodles"
     , body =
         [ header
-        , div [ class "p-4" ] [ pageContent model ]
+        , pageContent model
         , pageFooter
         ]
     }
@@ -292,6 +292,14 @@ header =
         ]
 
 
+withSubHeader : String -> Html Msg -> Html Msg
+withSubHeader subheaderText html =
+    div [ class "space-y-4" ]
+        [ h1 [ class "h1 pl-4 pt-4" ] [ text subheaderText ]
+        , html
+        ]
+
+
 pageContent : Model -> Html Msg
 pageContent model =
     case model of
@@ -299,25 +307,37 @@ pageContent model =
             Html.map HandleHomeMsg <| Home.view m
 
         Dots m ->
-            Html.map HandleDotsMsg <| Dots.view m
+            withSubHeader
+                "dots"
+                (Html.map HandleDotsMsg <| Dots.view m)
 
         Squares m ->
-            Html.map HandleSquaresMsg <| Squares.view m
+            withSubHeader
+                "squares"
+                (Html.map HandleSquaresMsg <| Squares.view m)
 
         Recaman m ->
-            Html.map HandleRecamanMsg <| Recaman.view m
+            withSubHeader
+                "recaman"
+                (Html.map HandleRecamanMsg <| Recaman.view m)
 
         MothersDay m ->
             MothersDay.view
 
         LockPuzzle m ->
-            Html.map HandleLockPuzzleMsg <| LockPuzzle.view m
+            withSubHeader
+                "lock puzzle"
+                (Html.map HandleLockPuzzleMsg <| LockPuzzle.view m)
 
         BlackSheep m ->
-            Html.map HandleBlackSheepMsg <| BlackSheep.view m
+            withSubHeader
+                "black sheep"
+                (Html.map HandleBlackSheepMsg <| BlackSheep.view m)
 
         ModularTimesTable m ->
-            Html.map HandleModularTimesTableMsg <| ModularTimesTable.view m
+            withSubHeader
+                "modular times table"
+                (Html.map HandleModularTimesTableMsg <| ModularTimesTable.view m)
 
         NotFound _ ->
             h2 [] [ text "Page not found" ]

@@ -85,19 +85,13 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "space-y-4" ]
-        [ header
-        , div [ class "flex flex-col space-y-8 lg:space-y-0 lg:flex-row lg:space-x-8 lg:h-[80vh]" ]
+    div [ class "pl-4 space-y-4" ]
+        [ div [ class "flex flex-col space-y-8 lg:space-y-0 lg:flex-row lg:space-x-8 lg:h-[80vh]" ]
             [ inputs model
             , timesTable (Maybe.withDefault 1 model.modulus) (Maybe.withDefault 1 model.multiplier)
             ]
         , footer
         ]
-
-
-header : Html Msg
-header =
-    h1 [ class "h1" ] [ text "modular times table" ]
 
 
 inputs : Model -> Html Msg
