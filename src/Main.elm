@@ -10,7 +10,6 @@ import Doodle.ModularTimesTable.Main as ModularTimesTable
 import Doodle.MothersDay as MothersDay
 import Doodle.Recaman as Recaman
 import Doodle.Squares as Squares
-import Header exposing (header)
 import Home
 import Html exposing (Html, div, footer, h1, h2, text)
 import Html.Attributes exposing (class, href)
@@ -277,8 +276,7 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "doodles.camp"
     , body =
-        [ header
-        , pageContent model
+        [ pageContent model
         , pageFooter
         ]
     }

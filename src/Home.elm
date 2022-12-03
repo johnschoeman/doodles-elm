@@ -1,6 +1,5 @@
 module Home exposing (Model, Msg, init, subscriptions, update, view)
 
-import Doodle.OrthoBoard.Main as OrthoBoard
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (class)
 import Route
@@ -8,21 +7,16 @@ import Session exposing (WithSession)
 
 
 type alias Model =
-    WithSession { subModel : OrthoBoard.Model }
+    WithSession { }
 
 
 type Msg
-    = HandleOrthoBoardMsg OrthoBoard.Msg
-    | NoOp
+    = NoOp
 
 
 init : Session.Model -> ( Model, Cmd Msg )
 init session =
-    let
-        ( initModel, initMsg ) =
-            OrthoBoard.init
-    in
-    ( { session = session, subModel = initModel }, Cmd.map HandleOrthoBoardMsg initMsg )
+    ( { session = session }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -36,27 +30,12 @@ view model =
             , a [ class "lnk text-lg", Route.href Route.Squares ] [ text "squares" ]
             , a [ class "lnk text-lg", Route.href Route.Dots ] [ text "dots" ]
             ]
-        , div [ class "scroll-y-auto w-full p-12 flex justify-end" ]
-            [ pageContent model
-            ]
         ]
-
-
-pageContent : Model -> Html Msg
-pageContent { subModel } =
-    Html.map HandleOrthoBoardMsg <| OrthoBoard.view subModel
 
 
 update : Model -> Msg -> ( Model, Cmd Msg )
 update model msg =
     case ( msg, model ) of
-        ( HandleOrthoBoardMsg subMsg, { subModel } ) ->
-            let
-                ( newModel, newMsg ) =
-                    OrthoBoard.update subMsg subModel
-            in
-            ( { model | subModel = newModel }, Cmd.none )
-
         ( NoOp, _ ) ->
             ( model, Cmd.none )
 
