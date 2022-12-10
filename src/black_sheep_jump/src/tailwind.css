@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Links */
+
+  .lnk {
+    @apply inline-block text-gray-800 underline;
+  }
+  .lnk:visited {
+    @apply text-gray-600;
+  }
+  .lnk:hover {
+    @apply text-blue-800;
+  }
+  .lnk:focus {
+    @apply outline-none;
+  }
+
+  /* Typography */
+
+  .h1 {
+    @apply text-lg font-bold;
+  }
+
+  .dot-box {
+    height: 65vmin;
+    width: 65vmin;
+  }
+
+  .half-square {
+    height: 50vw;
+    width: 50vw;
+  }
+
+  .full-square {
+    height: 90vw;
+    width: 90vw;
+  }
+}
