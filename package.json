@@ -3,12 +3,8 @@
   "version": "1.0.0",
   "description": "This project is a playground for browser doodles",
   "scripts": {
-    "build": "bin/build.sh",
-    "start": "node bin/watch.js",
-    "serve": "bin/serve.sh",
-    "make": "elm make",
-    "repl": "elm repl",
-    "reactor": "elm reactor"
+    "build": "bin/build_all.sh",
+    "serve": "bin/serve_all.sh"
   },
   "directories": {
     "test": "tests"
