@@ -1,6 +1,6 @@
 set -e
 
-DOODLE="recaman"
+DOODLE="squares"
 
 # Setup
 rm -rf build

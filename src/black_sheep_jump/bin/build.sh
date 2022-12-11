@@ -2,8 +2,6 @@ set -e
 
 DOODLE="black_sheep_jump"
 
-echo "Building" $DOODLE
-
 # Setup
 rm -rf build
 mkdir -p build/$DOODLE

@@ -1,6 +1,6 @@
 set -e
 
-DOODLE="recaman"
+DOODLE="mothers_day"
 
 # Setup
 rm -rf build

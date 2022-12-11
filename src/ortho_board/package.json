@@ -1,0 +1,21 @@
+{
+  "name": "ortho_board",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "bin/build.sh",
+    "watch": "node bin/watch.js",
+    "serve": "bin/serve.sh",
+    "prep": "elm-format src"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esbuild": "^0.16.4",
+    "esbuild-plugin-elm": "^0.0.12"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.27.10",
+    "chokidar": "^3.5.3"
+  }
+}

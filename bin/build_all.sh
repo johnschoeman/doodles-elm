@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 # Setup
@@ -5,28 +7,15 @@ rm -rf build
 mkdir build
 cp -r public/* build
 
-# Build
-cd src/modular_times_table
-bin/build.sh
-cd ../..
+doodles=( modular_times_table black_sheep_jump lock_puzzle recaman dots squares mothers_day ortho_board )
 
-cd src/black_sheep_jump
-bin/build.sh
-cd ../..
+for i in "${doodles[@]}"
+do
+  echo Building: "$i"
 
-cd src/lock_puzzle
-bin/build.sh
-cd ../..
+  cd src/$i
+  bin/build.sh
+  cd ../..
 
-cd src/recaman
-bin/build.sh
-cd ../..
-
-cd src/recaman
-bin/build.sh
-cd ../..
-
-cp -r ./src/modular_times_table/build/* build/
-cp -r ./src/black_sheep_jump/build/* build/
-cp -r ./src/lock_puzzle/build/* build/
-cp -r ./src/recaman/build/* build/
+  cp -r ./src/$i/build/* build/
+done

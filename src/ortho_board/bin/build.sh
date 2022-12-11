@@ -1,6 +1,6 @@
 set -e
 
-DOODLE="recaman"
+DOODLE="ortho_board"
 
 # Setup
 rm -rf build

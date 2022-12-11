@@ -2,8 +2,6 @@ set -e
 
 DOODLE="modular_times_table"
 
-echo "Building" $DOODLE
-
 # Setup
 rm -rf build
 mkdir -p build/$DOODLE

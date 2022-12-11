@@ -2,8 +2,6 @@ set -e
 
 DOODLE="lock_puzzle"
 
-echo "Building" $DOODLE
-
 # Setup
 rm -rf build
 mkdir -p build/$DOODLE
