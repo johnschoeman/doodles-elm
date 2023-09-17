@@ -3,8 +3,8 @@ module Main exposing (..)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import GameScreen as Game
-import Html exposing (Html, button, div, h1, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, button, div, h1, text)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Level as Level exposing (Level)
 import LevelsScreen as Levels
@@ -115,7 +115,10 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Black Sheep Jump"
     , body =
-        [ subView model
+        [ div [ class "flex flex-col h-full w-full px-8 py-8" ]
+            [ header
+            , subView model
+            ]
         ]
     }
 
@@ -128,3 +131,11 @@ subView model =
 goToGameCallback : Level -> Html.Attribute Msg
 goToGameCallback level =
     onClick (GoToGame level)
+
+
+header : Html Msg
+header =
+    div [ class "flex items-baseline" ]
+        [ h1 [ class "text-gray-800 text-3xl lg:text-4xl" ] [ text "Black Sheep Jump" ]
+        , a [ class "lnk ml-12", href "https://www.doodles.camp/" ] [ text "back" ]
+        ]

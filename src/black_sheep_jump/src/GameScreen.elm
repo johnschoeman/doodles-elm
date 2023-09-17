@@ -136,16 +136,19 @@ resetGame model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "w-full p-8 flex flex-col lg:flex-row h-screen" ]
-        [ div [ class "flex-1" ] [ boardToSvg model.board model.selection ]
-        , div [ class "flex-1" ] [ gameControls model ]
+    div [ class "w-full h-full flex flex-col lg:flex-row space-y-8 mt-8" ]
+        [ div [ class "w-full h-full" ]
+            [ boardToSvg model.board model.selection
+            ]
+        , gameControls model
         ]
 
 
 gameControls : Model -> Html Msg
 gameControls model =
-    div []
-        [ div [ class "mb-8 border-b border-gray-400" ] [ gameButtons model ]
+    div [ class "flex flex-col justify-center lg:justify-start items-center w-full space-y-8 lg:max-w-sm p-4" ]
+        [ div [ class "" ] [ gameButtons model ]
+        , div [ class "border-b border-gray-400 w-full" ] []
         , div [ class "flex justify-center items-center" ] [ gameStateIcon model.board ]
         ]
 
@@ -172,13 +175,13 @@ gameButtons model =
         currentLevelText =
             String.fromInt model.levelId
     in
-    div [ class "mt-4 flex flex-row justify-between lg:justify-around mb-8" ]
-        [ div [ class "flex flex-row w-1/2" ]
-            [ div [ class "flex-1" ]
+    div [ class "w-full flex flex-row justify-between lg:justify-around" ]
+        [ div [ class "flex flex-row" ]
+            [ div [ class "flex-1 mr-2" ]
                 [ button [ onClick DecrementLevel, class buttonStyle ] [ leftIcon ]
                 ]
             , div [ class "flex-1 text-2xl font-bold" ] [ text currentLevelText ]
-            , div [ class "flex-1" ]
+            , div [ class "flex-1 ml-2" ]
                 [ button [ onClick IncrementLevel, class buttonStyle ] [ rightIcon ]
                 ]
             ]
