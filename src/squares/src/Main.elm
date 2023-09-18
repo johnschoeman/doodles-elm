@@ -4,8 +4,8 @@ import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events exposing (onAnimationFrame)
 import Color.Convert
-import Html exposing (Html, div, text)
-import Html.Attributes as Attr exposing (class, style, type_, value)
+import Html exposing (Html, a, div, h1, text)
+import Html.Attributes as Attr exposing (class, href, style, type_, value)
 import Svg exposing (rect, svg)
 import Svg.Attributes exposing (fill, height, rx, ry, viewBox, width, x, y)
 import Task
@@ -34,9 +34,20 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "doodles.camp"
     , body =
-        [ subView model
+        [ div [ class "flex flex-col h-full w-full px-8 py-8" ]
+            [ header
+            , subView model
+            ]
         ]
     }
+
+
+header : Html Msg
+header =
+    div [ class "flex items-baseline" ]
+        [ h1 [ class "text-gray-800 text-3xl lg:text-4xl" ] [ text "Squares" ]
+        , a [ class "lnk ml-12", href "https://www.doodles.camp/" ] [ text "back" ]
+        ]
 
 
 type alias XPos =
@@ -200,7 +211,7 @@ subView : Model -> Html Msg
 subView model =
     case model.viewport of
         Just viewport ->
-            div []
+            div [ class "mt-4" ]
                 [ art viewport model
                 ]
 
