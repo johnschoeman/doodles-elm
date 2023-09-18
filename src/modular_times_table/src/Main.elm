@@ -7,7 +7,9 @@ import Color
 import Color.Interpolate
 import Html exposing (Html, a, div, footer, h1, h2, text)
 import Html.Attributes exposing (class, href)
+import Html.Events exposing (onClick)
 import InputHelpers exposing (..)
+import Random
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -65,6 +67,9 @@ type alias Model =
 type Msg
     = UpdateModulus String
     | UpdateMultiplier String
+    | Randomize
+    | RandomMod Int
+    | RandomMult Int
     | NoOp
 
 
@@ -101,6 +106,21 @@ update msg model =
             , Cmd.none
             )
 
+        Randomize ->
+            ( model
+            , Random.generate RandomMod (Random.int 1 maxModulus)
+            )
+
+        RandomMod modulus ->
+            ( { model | modulus = Just modulus }
+            , Random.generate RandomMult (Random.int 1 modulus)
+            )
+
+        RandomMult multiplier ->
+            ( { model | multiplier = Just multiplier }
+            , Cmd.none
+            )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -124,17 +144,28 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "doodles.camp"
     , body =
-        [ subView model
+        [ div [ class "flex flex-col h-full w-full px-8 py-8" ]
+            [ header
+            , subView model
+            ]
         ]
     }
 
 
+header : Html Msg
+header =
+    div [ class "flex items-baseline" ]
+        [ h1 [ class "text-gray-800 text-3xl lg:text-4xl" ] [ text "Modular" ]
+        , a [ class "lnk ml-12", href "https://www.doodles.camp/" ] [ text "back" ]
+        ]
+
+
 subView : Model -> Html Msg
 subView model =
-    div [ class "pl-4 space-y-4" ]
+    div [ class "space-y-4 mt-4" ]
         [ div [ class "flex flex-col space-y-8 lg:space-y-0 lg:flex-row lg:space-x-8 lg:h-[80vh]" ]
-            [ inputs model
-            , timesTable (Maybe.withDefault 1 model.modulus) (Maybe.withDefault 1 model.multiplier)
+            [ timesTable (Maybe.withDefault 1 model.modulus) (Maybe.withDefault 1 model.multiplier)
+            , inputs model
             ]
         , footer
         ]
@@ -152,9 +183,9 @@ inputs { modulus, multiplier } =
         modulusOptionText =
             String.join " " [ "max:", String.fromInt maxModulus ]
     in
-    div [ class "flex space-x-2 justify-start lg:flex-col lg:space-x-0 lg:space-y-2" ]
-        [ InputHelpers.numberInput "modulus" modulusOptionText "-" modulusText UpdateModulus
-        , InputHelpers.numberInput "multiplier" "max: (mod - 1)" "-" multiplierText UpdateMultiplier
+    div [ class "flex justify-start items-center flex-col space-y-2 w-full lg:max-w-sm" ]
+        [ InputHelpers.numberInput "mod" modulusOptionText "-" modulusText UpdateModulus
+        , InputHelpers.numberInput "mult" "max: (mod - 1)" "-" multiplierText UpdateMultiplier
         ]
 
 
@@ -182,7 +213,7 @@ timesTable modulus multiplier =
         zippedList =
             List.map2 (\m r -> ( m, r )) modulusIntList remaindersList
     in
-    div [ class "w-full" ]
+    div [ class "w-full cursor-pointer", onClick Randomize ]
         [ numberDiagram modulus zippedList
         ]
 

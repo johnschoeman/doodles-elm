@@ -3,8 +3,8 @@ module Main exposing (..)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import FeatherIcons
-import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes as Attr exposing (class, classList, style, type_, value)
+import Html exposing (Html, a, button, div, h1, input, label, text)
+import Html.Attributes as Attr exposing (class, classList, href, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import InputHelpers
 import List.Extra exposing (updateAt)
@@ -194,14 +194,25 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Lock Puzzle"
     , body =
-        [ subView model
+        [ div [ class "flex flex-col h-full w-full px-8 py-8" ]
+            [ header
+            , subView model
+            ]
         ]
     }
 
 
+header : Html Msg
+header =
+    div [ class "flex items-baseline" ]
+        [ h1 [ class "text-gray-800 text-3xl lg:text-4xl" ] [ text "Lock Puzzle" ]
+        , a [ class "lnk ml-12", href "https://www.doodles.camp/" ] [ text "back" ]
+        ]
+
+
 subView : Model -> Html Msg
 subView model =
-    div [ class "w-full p-8 flex flex-col lg:flex-row h-[80vh]" ]
+    div [ class "w-full flex flex-col lg:flex-row h-[80vh] mt-4" ]
         [ div [ class "flex-1 flex justify-center" ] [ gameBoard model ]
         , div [ class "flex-1" ] [ gameControls model ]
         ]

@@ -2,8 +2,8 @@ module Main exposing (..)
 
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
-import Html exposing (Html, button, div, option, p, select, text)
-import Html.Attributes exposing (class, selected, value)
+import Html exposing (Html, button, div, option, p, select, text, a, h1)
+import Html.Attributes exposing (class, selected, value, href)
 import Html.Events exposing (onClick, onInput)
 import InputHelpers exposing (squareButton)
 import Random
@@ -495,9 +495,19 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "doodles.camp"
     , body =
-        [ subView model
+        [ div [ class "flex flex-col h-full w-full px-8 py-8" ]
+          [ header
+            , subView model
+          ]
         ]
     }
+
+header : Html Msg
+header =
+    div [ class "flex items-baseline" ]
+        [ h1 [ class "text-gray-800 text-3xl lg:text-4xl" ] [ text "Dots" ]
+        , a [ class "lnk ml-12", href "https://www.doodles.camp/" ] [ text "back" ]
+        ]
 
 
 subView : Model -> Html Msg
