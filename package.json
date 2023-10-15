@@ -44,7 +44,7 @@
     "postcss-loader": "4.1.0",
     "postcss-safe-parser": "5.0.2",
     "promise": "8.1.0",
-    "react-dev-utils": "6.1.1",
+    "react-dev-utils": "12.0.1",
     "react-error-overlay": "4.0.1",
     "serve": "^13.0.2",
     "sockjs-client": "1.4.0",
