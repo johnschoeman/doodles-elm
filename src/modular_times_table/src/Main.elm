@@ -156,7 +156,6 @@ header : Html Msg
 header =
     div [ class "flex items-baseline" ]
         [ h1 [ class "text-gray-800 text-3xl lg:text-4xl" ] [ text "Modular" ]
-        , a [ class "lnk ml-12", href "https://www.doodles.camp/" ] [ text "back" ]
         ]
 
 
